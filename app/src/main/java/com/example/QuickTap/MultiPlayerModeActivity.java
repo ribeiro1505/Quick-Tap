@@ -3,11 +3,19 @@ package com.example.QuickTap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import java.util.Random;
 
@@ -29,6 +37,9 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     private int randomInstant;
     private int topPlayerScoreValue, bottomPlayerScoreValue = 0;
 
+
+    //********************     RUNNABLES     ********************
+
     Runnable showNewGameRunnable = new Runnable() {
         @Override
         public void run() {
@@ -44,10 +55,23 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         }
     };
 
+
+    //********************     ACTIVITY     ********************
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mode_multiplayer);
+
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         mp = MediaPlayer.create(this, R.raw.gun_sound);
 
@@ -64,8 +88,23 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         readyToPlay();
     }
 
-    private void readyToPlay() {
+    private void newGame() {
+        topPlayerScore.setText(String.valueOf(topPlayerScoreValue));
+        bottomPlayerScore.setText(String.valueOf(bottomPlayerScoreValue));
 
+        handler = new Handler();
+        handler.postDelayed(showNewGameRunnable, 2000);
+    }
+
+    private void showNewGame() {
+        topPlayer.setVisibility(View.VISIBLE);
+        bottomPlayer.setVisibility(View.VISIBLE);
+        topBackground.setBackgroundColor(getColor(R.color.white));
+        bottomBackground.setBackgroundColor(getColor(R.color.white));
+        readyToPlay();
+    }
+
+    private void readyToPlay() {
         topPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,7 +129,6 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     }
 
     private void startGame() {
-
         isBottomPlayerReady = false;
         isTopPlayerReady = false;
 
@@ -101,11 +139,18 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
         handler = new Handler();
         handler.postDelayed(canClickRunnable, randomInstant * 1000);
-
     }
 
-    private void playGameListeners() {
+    private void canClick() {
+        canClick = true;
+        topBackground.setBackgroundColor(getColor(R.color.yellowBackground));
+        bottomBackground.setBackgroundColor(getColor(R.color.yellowBackground));
+    }
 
+
+    //********************     LISTENERS     ********************
+
+    private void playGameListeners() {
         topBackground.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,14 +166,15 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
                 checkClick("bottom");
             }
         });
-
     }
 
-    private void canClick() {
-        canClick = true;
-        topBackground.setBackgroundColor(getColor(R.color.yellowBackground));
-        bottomBackground.setBackgroundColor(getColor(R.color.yellowBackground));
+    private void endGameListeners() {
+        topBackground.setOnClickListener(null);
+        bottomBackground.setOnClickListener(null);
     }
+
+
+    //********************     CLICK TESTS     ********************
 
     private void checkClick(String player) {
         handler.removeCallbacks(canClickRunnable);
@@ -149,14 +195,15 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     }
 
     private void correctClick(String player) {
-
         if (player.equals("top"))
             TopWins();
         else
             BottomWins();
-
         newGame();
     }
+
+
+    //********************     WINNER     ********************
 
     private void TopWins() {
         topBackground.setBackgroundColor(getColor(R.color.greenBackgroud));
@@ -168,27 +215,6 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         bottomBackground.setBackgroundColor(getColor(R.color.greenBackgroud));
         topBackground.setBackgroundColor(getColor(R.color.redBackground));
         bottomPlayerScoreValue++;
-    }
-
-    private void newGame() {
-        topPlayerScore.setText(String.valueOf(topPlayerScoreValue));
-        bottomPlayerScore.setText(String.valueOf(bottomPlayerScoreValue));
-
-        handler = new Handler();
-        handler.postDelayed(showNewGameRunnable, 2000);
-    }
-
-    private void showNewGame() {
-        topPlayer.setVisibility(View.VISIBLE);
-        bottomPlayer.setVisibility(View.VISIBLE);
-        topBackground.setBackgroundColor(getColor(R.color.white));
-        bottomBackground.setBackgroundColor(getColor(R.color.white));
-        readyToPlay();
-    }
-
-    private void endGameListeners() {
-        topBackground.setOnClickListener(null);
-        bottomBackground.setOnClickListener(null);
     }
 
 }

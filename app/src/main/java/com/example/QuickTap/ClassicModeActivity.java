@@ -5,11 +5,19 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -31,9 +39,11 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     Handler handler;
     MediaPlayer mp;
+    private InterstitialAd mInterstitialAd;
 
     private int highScore;
-    private int randomInstant, count;
+    private int count;
+    private int plays = 0;
     private boolean canClick = false;
 
     //********************     RUNNABLES     ********************
@@ -67,13 +77,14 @@ public class ClassicModeActivity extends AppCompatActivity {
         }
     };
 
-
     //********************     ACTIVITY     ********************
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mode_classic);
+
+        loadAds();
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
         mp = MediaPlayer.create(this, R.raw.gun_sound);
@@ -94,7 +105,7 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     private void startGame() {
         timeCounter.setVisibility(View.INVISIBLE);
-        randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
+        int randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
         count = 0;
         canClick = false;
 
@@ -115,6 +126,14 @@ public class ClassicModeActivity extends AppCompatActivity {
     }
 
     private void showNewGame() {
+        plays++;
+        if (plays == 8)
+            loadFullScreenAdd();
+        else if (plays == 10) {
+            plays = 0;
+            showFullScreenAdd();
+        }
+
         timeCounter.setVisibility(View.VISIBLE);
         timeCounter.setText("START");
         background.setBackgroundColor(getColor(R.color.white));
@@ -130,20 +149,14 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     //********************     CLICK TESTS     ********************
 
-    private void checkClick() throws InterruptedException {
+    private void checkClick() {
         if (canClick)
             correctClick();
         else
             incorrectClick();
     }
 
-    private void incorrectClick() {
-        canClick = false;
-        background.setBackgroundColor(getColor(R.color.redBackground));
-        newGame();
-    }
-
-    private void correctClick() throws InterruptedException {
+    private void correctClick() {
         canClick = false;
 
         scheduler.shutdown();
@@ -154,6 +167,12 @@ public class ClassicModeActivity extends AppCompatActivity {
         timeCounter.setText(count + " ms");
         setHighScore(count);
 
+        newGame();
+    }
+
+    private void incorrectClick() {
+        canClick = false;
+        background.setBackgroundColor(getColor(R.color.redBackground));
         newGame();
     }
 
@@ -205,22 +224,14 @@ public class ClassicModeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 endGameListeners();
-                try {
-                    checkClick();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                checkClick();
             }
         });
         timeCounter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 endGameListeners();
-                try {
-                    checkClick();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                checkClick();
             }
         });
     }
@@ -242,5 +253,31 @@ public class ClassicModeActivity extends AppCompatActivity {
                         "\n\nHave fun!")
                 .create()
                 .show();
+    }
+
+
+    //********************     ADS METHODS     ********************
+
+    private void loadFullScreenAdd() {
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void showFullScreenAdd() {
+        mInterstitialAd.show();
+    }
+
+    private void loadAds() {
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
     }
 }
