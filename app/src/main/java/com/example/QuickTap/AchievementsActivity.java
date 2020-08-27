@@ -54,26 +54,25 @@ public class AchievementsActivity extends AppCompatActivity {
 }
 
 /*Share your highscore
-1 jogada correta
-5 jogadas corretas
-50 jogadas corretas
-100 jogadas corretas
-1000 jogadas corretas
-5000 jogadas corretas
-100000 jogadas corretas
-5 dias consecutivos a jogar
-10 dias consecutivos a jogar
-100 dias consecutivos a jogar
-365 dias consecutivos a jogar
-Menos de 500 ms de reação
-Menos de 400 ms de reação
-Menos de 300 ms de reação
-Menos de 200 ms de reação
-Menos de 100 ms de reação
-Menos de 50 ms de reação
-Menos de 10 ms de reação
-Todos os objectivos completados!
-Jogar 100 jogos no modo Multi-player
-Jogar 1000 jogos no modo Multi-player
-Objectivo surpresa (mais de 1000000 ms de reação)
-Objectivo surpresa (100 jogadas erradas)*/
+5 jogadas corretas                                      check
+50 jogadas corretas                                     check
+100 jogadas corretas                                    check
+1000 jogadas corretas                                   check
+5000 jogadas corretas                                   check
+100000 jogadas corretas                                 check
+5 dias consecutivos a jogar                             check
+10 dias consecutivos a jogar                            check
+100 dias consecutivos a jogar                           check
+Menos de 500 ms de reação                               check
+Menos de 400 ms de reação                               check
+Menos de 300 ms de reação                               check
+Menos de 200 ms de reação                               check
+Menos de 100 ms de reação                               check
+Menos de 50 ms de reação                                check
+Todos os objectivos completados!                        check
+Jogar 100 jogos no modo Multi-player                    check
+Jogar 1000 jogos no modo Multi-player                   check
+Jogar 100000 jogos no modo Multi-player                 check
+Objectivo surpresa (mais de 1000000 ms de reação)       check
+Objectivo surpresa (100 jogadas erradas)                check
+*/
