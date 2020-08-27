@@ -1,4 +1,4 @@
-package com.example.reactiongame;
+package com.example.QuickTap;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class ClassicModeActivity extends AppCompatActivity {
 
     private static final int MIN = 1;
     private static final int MAX = 10;
@@ -74,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.mode_classic);
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
         mp = MediaPlayer.create(this, R.raw.gun_sound);

@@ -1,4 +1,4 @@
-package com.example.reactiongame;
+package com.example.QuickTap;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

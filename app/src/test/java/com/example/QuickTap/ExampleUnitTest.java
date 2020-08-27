@@ -1,4 +1,4 @@
-package com.example.reactiongame;
+package com.example.QuickTap;
 
 import org.junit.Test;
 

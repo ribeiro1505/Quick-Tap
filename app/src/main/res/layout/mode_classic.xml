@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:id="@+id/mainLayout"
     android:background="@color/white"
-    tools:context=".MainActivity">
+    tools:context=".ClassicModeActivity">
 
     <TextView
         android:id="@+id/timeCounter"
