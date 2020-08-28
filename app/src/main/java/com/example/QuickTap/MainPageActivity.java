@@ -30,20 +30,13 @@ public class MainPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_page);
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-        AdView mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        loadAds();
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
-        String json = sharedPref.getString("achievements", null);
+        sharedPref.edit().putString("PlayerStats", null).apply();
+        String json = sharedPref.getString("PlayerStats", null);
         if (json == null) {
-            createAchievements();
+            createPlayerStats();
         }
 
         classicMode = findViewById(R.id.classicMode);
@@ -84,12 +77,24 @@ public class MainPageActivity extends AppCompatActivity {
         });
     }
 
-    private void createAchievements() {
+    private void createPlayerStats() {
         SharedPreferences.Editor editor = sharedPref.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(new boolean[24]);
-        editor.putString("achievements", json);
+        String json = gson.toJson(new PlayerStats());
+        editor.putString("PlayerStats", json);
         editor.apply();
+    }
+
+    private void loadAds() {
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
 }

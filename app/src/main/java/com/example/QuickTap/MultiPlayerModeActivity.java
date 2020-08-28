@@ -1,5 +1,6 @@
 package com.example.QuickTap;
 
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +17,10 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Random;
 
 public class MultiPlayerModeActivity extends AppCompatActivity {
@@ -28,8 +32,11 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     ImageView topBackground, bottomBackground;
 
     Handler handler;
-
     MediaPlayer mp;
+
+    SharedPreferences sharedPref;
+    private PlayerStats playerStats;
+    Gson gson;
 
     private boolean isTopPlayerReady, isBottomPlayerReady = false;
     private boolean canClick = false;
@@ -63,17 +70,11 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mode_multiplayer);
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-        AdView mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        loadAds();
 
         mp = MediaPlayer.create(this, R.raw.gun_sound);
+        sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
+        playerStats = getPlayerStats();
 
         topPlayer = findViewById(R.id.topPlayer);
         topBackground = findViewById(R.id.topBackground);
@@ -92,11 +93,15 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         topPlayerScore.setText(String.valueOf(topPlayerScoreValue));
         bottomPlayerScore.setText(String.valueOf(bottomPlayerScoreValue));
 
+        updatePlayerStats();
+
         handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
     private void showNewGame() {
+        playerStats.checkForAchievements(this);
+
         topPlayer.setVisibility(View.VISIBLE);
         bottomPlayer.setVisibility(View.VISIBLE);
         topBackground.setBackgroundColor(getColor(R.color.white));
@@ -178,6 +183,7 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
     private void checkClick(String player) {
         handler.removeCallbacks(canClickRunnable);
+        playerStats.multiPlayerGames++;
 
         if (canClick)
             correctClick(player);
@@ -190,7 +196,6 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
             BottomWins();
         else
             TopWins();
-
         newGame();
     }
 
@@ -215,6 +220,41 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         bottomBackground.setBackgroundColor(getColor(R.color.greenBackgroud));
         topBackground.setBackgroundColor(getColor(R.color.redBackground));
         bottomPlayerScoreValue++;
+    }
+
+
+    //********************     ADS     ********************
+
+    private void loadAds() {
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
+
+    //********************     ACHIEVEMENTS     ********************
+
+    private PlayerStats getPlayerStats() {
+        gson = new Gson();
+        String json = sharedPref.getString("PlayerStats", null);
+        Type type = new TypeToken<PlayerStats>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
+    private void updatePlayerStats() {
+        playerStats.checkForAchievements(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        gson = new Gson();
+        String json = gson.toJson(playerStats);
+        editor.putString("PlayerStats", json);
+        editor.apply();
     }
 
 }

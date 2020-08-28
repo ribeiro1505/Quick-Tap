@@ -1,3 +1,68 @@
 <resources>
     <string name="app_name">Quick! Tap</string>
+
+    <string name="unlockAchievement">To unlock this Achievement you must:</string>
+    <string name="achievementUnlocked">You have already unlocked this Achievement</string>
+    <string name="newAchievement">Congratulations!\nYou\'ve unlocked a new Achievement!</string>
+
+    <string-array name="achievementsSentences">
+        <item>Play at least 5 correct runs in Classic Mode</item>
+        <item>Play at least 50 correct runs in Classic Mode</item>
+        <item>Play at least 100 correct runs in Classic Mode</item>
+        <item>Play at least 1000 correct runs in Classic Mode</item>
+        <item>Play at least 5000 correct runs in Classic Mode</item>
+        <item>Play at least 100000 correct runs in Classic Mode</item>
+        <item>Play for 5 consecutive days</item>
+        <item>Play for 10 consecutive days</item>
+        <item>Play for 100 consecutive days</item>
+        <item>Have a reaction time of 500 ms or less in Classic Mode</item>
+        <item>Have a reaction time of 400 ms or less in Classic Mode</item>
+        <item>Have a reaction time of 300 ms or less in Classic Mode</item>
+        <item>Have a reaction time of 200 ms or less in Classic Mode</item>
+        <item>Have a reaction time of 100 ms or less in Classic Mode</item>
+        <item>Have a reaction time of 50 ms or less in Classic Mode</item>
+        <item>Tap at least 5 dots in a single run of Random Mode</item>
+        <item>Tap at least 10 dots in a single run of Random Mode</item>
+        <item>Tap at least 15 dots in a single run of Random Mode</item>
+        <item>Tap at least 20 dots in a single run of Random Mode</item>
+        <item>Tap at least 25 dots in a single run of Random Mode</item>
+        <item>Tap at least 30 dots in a single run of Random Mode</item>
+        <item>Play at least 100 games in MultiPlayer Mode</item>
+        <item>Play at least 1000 games in MultiPlayer Mode</item>
+        <item>Play at least 100000 games in MultiPlayer Mode</item>
+        <item>Complete a mystery task</item>
+        <item>Complete a mystery task</item>
+        <item>Complete all other achievements</item>
+    </string-array>
+
+    <string-array name="newAchievementMessage">
+        <item>You\'ve played 5 correct runs in Classic Mode</item>
+        <item>You\'ve played 50 correct runs in Classic Mode</item>
+        <item>You\'ve played 100 correct runs in Classic Mode</item>
+        <item>You\'ve played 1000 correct runs in Classic Mode</item>
+        <item>You\'ve played 5000 correct runs in Classic Mode</item>
+        <item>You\'ve played 100000 correct runs in Classic Mode</item>
+        <item>You\'ve played for 5 consecutive days</item>
+        <item>You\'ve played for 10 consecutive days</item>
+        <item>You\'ve played for 100 consecutive days</item>
+        <item>You had a reaction time of 500 ms or less in Classic Mode</item>
+        <item>You had a reaction time of 400 ms or less in Classic Mode</item>
+        <item>You had a reaction time of 300 ms or less in Classic Mode</item>
+        <item>You had a reaction time of 200 ms or less in Classic Mode</item>
+        <item>You had a reaction time of 100 ms or less in Classic Mode</item>
+        <item>You had a reaction time of 50 ms or less in Classic Mode</item>
+        <item>You\'ve tapped at least 5 dots in a single run of Random Mode</item>
+        <item>You\'ve tapped at least 10 dots in a single run of Random Mode</item>
+        <item>You\'ve tapped at least 15 dots in a single run of Random Mode</item>
+        <item>You\'ve tapped at least 20 dots in a single run of Random Mode</item>
+        <item>You\'ve tapped at least 25 dots in a single run of Random Mode</item>
+        <item>You\'ve tapped at least 30 dots in a single run of Random Mode</item>
+        <item>You\'ve played at least 100 games in MultiPlayer Mode</item>
+        <item>You\'ve played at least 1000 games in MultiPlayer Mode</item>
+        <item>You\'ve played at least 100000 games in MultiPlayer Mode</item>
+        <item>You\'ve completed a mystery task! Your reaction time was over 1 Million ms</item>
+        <item>You\'ve completed a mystery task! You\'ve played 100 incorrect runs in Classic Mode</item>
+        <item>You\'ve completed all achievements</item>
+    </string-array>
+
 </resources>

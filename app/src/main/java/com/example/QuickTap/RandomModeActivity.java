@@ -21,7 +21,10 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Random;
 
 public class RandomModeActivity extends AppCompatActivity {
@@ -38,8 +41,9 @@ public class RandomModeActivity extends AppCompatActivity {
     private InterstitialAd mInterstitialAd;
 
     SharedPreferences sharedPref;
+    private PlayerStats playerStats;
+    Gson gson;
 
-    private int highScore;
     private int timeInterval = 1000;
     private int clicks, plays = 0;
     private boolean clicked = false;
@@ -84,6 +88,7 @@ public class RandomModeActivity extends AppCompatActivity {
         setContentView(R.layout.mode_random);
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
+        playerStats = getPlayerStats();
 
         startButton = findViewById(R.id.startButton);
         highScoreText = findViewById(R.id.highScore);
@@ -154,6 +159,9 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void newGame() {
+        updatePlayerStats();
+
+        handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
@@ -183,23 +191,24 @@ public class RandomModeActivity extends AppCompatActivity {
     //********************     HIGH SCORES     ********************
 
     private void setHighScoreText(int newScore) {
-        if (highScore == -1 || newScore > highScore)
-            sharedPref.edit().putInt("randomHighScore", newScore).commit();
+        if (playerStats.randomClicks == 0 || newScore > playerStats.randomClicks)
+            playerStats.randomClicks = newScore;
         loadHighScore();
     }
 
     private void loadHighScore() {
-        highScore = sharedPref.getInt("randomHighScore", -1);
-        if (highScore == -1)
+        if (playerStats.randomClicks == 0)
             highScoreText.setVisibility(View.INVISIBLE);
-        else
-            highScoreText.setText("HighScore: " + highScore);
+        else{
+            highScoreText.setText("HighScore: " + playerStats.randomClicks);
+            highScoreText.setVisibility(View.VISIBLE);
+        }
     }
 
     private void shareHighScore() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, highScore + " clicks is my best score in random mode!\n\n" +
+        shareIntent.putExtra(Intent.EXTRA_TEXT, playerStats.randomClicks + " clicks is my best score in random mode!\n\n" +
                 "Download the App at https://drive.google.com/drive/folders/1KEt8E7u--aW24HIu11ghAFWDnKlgh2kY?usp=sharing");
         startActivity(Intent.createChooser(shareIntent, "Share text via"));
     }
@@ -241,6 +250,26 @@ public class RandomModeActivity extends AppCompatActivity {
         handler.removeCallbacks(cantClickRunnable);
         background.setOnClickListener(null);
         clickButton.setOnClickListener(null);
+    }
+
+
+    //********************     ACHIEVEMENTS     ********************
+
+    private PlayerStats getPlayerStats() {
+        gson = new Gson();
+        String json = sharedPref.getString("PlayerStats", null);
+        Type type = new TypeToken<PlayerStats>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
+    private void updatePlayerStats() {
+        playerStats.checkForAchievements(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        gson = new Gson();
+        String json = gson.toJson(playerStats);
+        editor.putString("PlayerStats", json);
+        editor.apply();
     }
 
 

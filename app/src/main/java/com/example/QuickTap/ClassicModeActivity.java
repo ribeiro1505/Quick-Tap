@@ -18,7 +18,10 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,8 +43,9 @@ public class ClassicModeActivity extends AppCompatActivity {
     Handler handler;
     MediaPlayer mp;
     private InterstitialAd mInterstitialAd;
+    private PlayerStats playerStats;
+    Gson gson;
 
-    private int highScore;
     private int count;
     private int plays = 0;
     private boolean canClick = false;
@@ -87,6 +91,7 @@ public class ClassicModeActivity extends AppCompatActivity {
         loadAds();
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
+        playerStats = getPlayerStats();
         mp = MediaPlayer.create(this, R.raw.gun_sound);
 
         timeCounter = findViewById(R.id.timeCounter);
@@ -142,6 +147,8 @@ public class ClassicModeActivity extends AppCompatActivity {
     }
 
     private void newGame() {
+        updatePlayerStats();
+
         handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
@@ -166,6 +173,8 @@ public class ClassicModeActivity extends AppCompatActivity {
         background.setBackgroundColor(getColor(R.color.greenBackgroud));
         timeCounter.setText(count + " ms");
         setHighScore(count);
+        updateCorrectPlays();
+        updatePlayerScores(count);
 
         newGame();
     }
@@ -173,6 +182,7 @@ public class ClassicModeActivity extends AppCompatActivity {
     private void incorrectClick() {
         canClick = false;
         background.setBackgroundColor(getColor(R.color.redBackground));
+        updateIncorrectPlays();
         newGame();
     }
 
@@ -180,27 +190,25 @@ public class ClassicModeActivity extends AppCompatActivity {
     //********************     HIGH SCORES     ********************
 
     private void loadHighScore() {
-        highScore = sharedPref.getInt("highScore", -1);
-
-        if (highScore == -1) {
+        if (playerStats.bestReactionTime == Integer.MAX_VALUE) {
             highScoreText.setVisibility(View.INVISIBLE);
             showTutorial();
         } else {
             highScoreText.setVisibility(View.VISIBLE);
-            highScoreText.setText(String.format("HighScore: %d ms", highScore));
+            highScoreText.setText(String.format("HighScore: %d ms", playerStats.bestReactionTime));
         }
     }
 
     private void setHighScore(int newScore) {
-        if (highScore == -1 || newScore < highScore)
-            sharedPref.edit().putInt("highScore", newScore).commit();
+        if (playerStats.bestReactionTime == Integer.MAX_VALUE || newScore < playerStats.bestReactionTime)
+            playerStats.bestReactionTime = newScore;
         loadHighScore();
     }
 
     private void shareHighScore() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, highScore + " ms is my best reaction time!\n\n" +
+        shareIntent.putExtra(Intent.EXTRA_TEXT, playerStats.bestReactionTime + " ms is my best reaction time!\n\n" +
                 "Download the App at https://drive.google.com/drive/folders/1KEt8E7u--aW24HIu11ghAFWDnKlgh2kY?usp=sharing");
         startActivity(Intent.createChooser(shareIntent, "Share text via"));
     }
@@ -253,6 +261,43 @@ public class ClassicModeActivity extends AppCompatActivity {
                         "\n\nHave fun!")
                 .create()
                 .show();
+    }
+
+
+    //********************     ACHIEVEMENTS     ********************
+
+    private PlayerStats getPlayerStats() {
+        gson = new Gson();
+        String json = sharedPref.getString("PlayerStats", null);
+        Type type = new TypeToken<PlayerStats>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
+    private void updateCorrectPlays() {
+        playerStats.correctPlays++;
+    }
+
+    private void updateIncorrectPlays() {
+        playerStats.wrongPlays++;
+    }
+
+    private void updatePlayerScores(int count) {
+        if (playerStats.bestReactionTime > count) {
+            playerStats.bestReactionTime = count;
+        }
+        if (playerStats.worstReactionTime < count) {
+            playerStats.worstReactionTime = count;
+        }
+    }
+
+    private void updatePlayerStats() {
+        playerStats.checkForAchievements(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        gson = new Gson();
+        String json = gson.toJson(playerStats);
+        editor.putString("PlayerStats", json);
+        editor.apply();
     }
 
 
