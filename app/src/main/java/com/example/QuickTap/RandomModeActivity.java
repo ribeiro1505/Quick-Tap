@@ -308,6 +308,7 @@ public class RandomModeActivity extends AppCompatActivity {
         builder.setTitle("Tutorial").
                 setMessage("Tap the yellow circle as fast as you can." +
                         "\n\nAfter each tap, the time the circle stays on the screen decreases." +
+                        "\n\nTo share your highScore, tap it." +
                         "\n\nHave fun!")
                 .create()
                 .show();

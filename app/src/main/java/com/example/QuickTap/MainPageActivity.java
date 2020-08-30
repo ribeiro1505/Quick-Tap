@@ -1,5 +1,6 @@
 package com.example.QuickTap;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -94,14 +95,22 @@ public class MainPageActivity extends AppCompatActivity {
         int thisDay = c.get(Calendar.DAY_OF_YEAR);
         int lastDay = playerStats.lastOnlineDay;
 
-        if (lastDay == thisDay - 1) {
+        if (lastDay == thisDay - 1 ||
+                (lastDay == 365 && thisDay == 1) ||
+                (lastDay == 366 && thisDay == 1)) {
             playerStats.consecutiveDays++;
             playerStats.checkForAchievements(this);
         } else if (lastDay != thisDay) {
-            playerStats.consecutiveDays = 0;
+            playerStats.consecutiveDays = 1;
         }
         playerStats.lastOnlineDay = thisDay;
         updatePlayerStats();
+
+        if (playerStats.consecutiveDays > 1)
+            new AlertDialog.Builder(this)
+                    .setTitle("You've been playing for " + playerStats.consecutiveDays + " consecutive days!\n" +
+                            "Keep playing daily to win Achievements!")
+                    .show();
     }
 
     private void createPlayerStats() {

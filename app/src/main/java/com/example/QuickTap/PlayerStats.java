@@ -21,7 +21,7 @@ public class PlayerStats {
         this.achievements = new boolean[27];
         this.correctPlays = 0;
         this.wrongPlays = 0;
-        this.consecutiveDays = 0;
+        this.consecutiveDays = 1;
         this.lastOnlineDay = 0;
         this.bestReactionTime = Integer.MAX_VALUE;
         this.worstReactionTime = Integer.MIN_VALUE;
