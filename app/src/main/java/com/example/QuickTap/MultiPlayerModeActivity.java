@@ -93,14 +93,12 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         topPlayerScore.setText(String.valueOf(topPlayerScoreValue));
         bottomPlayerScore.setText(String.valueOf(bottomPlayerScoreValue));
 
-        updatePlayerStats();
-
         handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
     private void showNewGame() {
-        playerStats.checkForAchievements(this);
+        updatePlayerStats();
 
         topPlayer.setVisibility(View.VISIBLE);
         bottomPlayer.setVisibility(View.VISIBLE);

@@ -17,13 +17,20 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.Calendar;
 
 public class MainPageActivity extends AppCompatActivity {
 
     TextView classicMode, randomMode, multiPlayerMode;
     ImageView achievements;
 
+    PlayerStats playerStats;
+
     SharedPreferences sharedPref;
+    Gson gson = new Gson();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,11 +40,16 @@ public class MainPageActivity extends AppCompatActivity {
         loadAds();
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
-        sharedPref.edit().putString("PlayerStats", null).apply();
+        //sharedPref.edit().putString("PlayerStats", null).apply();
         String json = sharedPref.getString("PlayerStats", null);
         if (json == null) {
             createPlayerStats();
+        } else {
+            Type type = new TypeToken<PlayerStats>() {
+            }.getType();
+            playerStats = new Gson().fromJson(json, type);
         }
+        checkDate();
 
         classicMode = findViewById(R.id.classicMode);
         randomMode = findViewById(R.id.randomMode);
@@ -77,10 +89,37 @@ public class MainPageActivity extends AppCompatActivity {
         });
     }
 
+    private void checkDate() {
+        Calendar c = Calendar.getInstance();
+        int thisDay = c.get(Calendar.DAY_OF_YEAR);
+        int lastDay = playerStats.lastOnlineDay;
+
+        if (lastDay == thisDay - 1) {
+            playerStats.consecutiveDays++;
+            playerStats.checkForAchievements(this);
+        } else if (lastDay != thisDay) {
+            playerStats.consecutiveDays = 0;
+        }
+        playerStats.lastOnlineDay = thisDay;
+        updatePlayerStats();
+    }
+
     private void createPlayerStats() {
         SharedPreferences.Editor editor = sharedPref.edit();
-        Gson gson = new Gson();
         String json = gson.toJson(new PlayerStats());
+
+        Type type = new TypeToken<PlayerStats>() {
+        }.getType();
+        playerStats = new Gson().fromJson(json, type);
+
+        editor.putString("PlayerStats", json);
+        editor.apply();
+    }
+
+    private void updatePlayerStats() {
+        playerStats.checkForAchievements(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        String json = gson.toJson(playerStats);
         editor.putString("PlayerStats", json);
         editor.apply();
     }

@@ -5,13 +5,12 @@ import android.content.Context;
 
 public class PlayerStats {
 
-    Context context;
-
     public boolean achievements[];
 
     public int correctPlays,
             wrongPlays,
             consecutiveDays,
+            lastOnlineDay,
             bestReactionTime,
             worstReactionTime,
             multiPlayerGames,
@@ -23,6 +22,7 @@ public class PlayerStats {
         this.correctPlays = 0;
         this.wrongPlays = 0;
         this.consecutiveDays = 0;
+        this.lastOnlineDay = 0;
         this.bestReactionTime = Integer.MAX_VALUE;
         this.worstReactionTime = Integer.MIN_VALUE;
         this.multiPlayerGames = 0;
@@ -31,131 +31,129 @@ public class PlayerStats {
     }
 
     public void checkForAchievements(Context context) {
-        this.context = context;
-
         if (correctPlays >= 5 && !achievements[0]) {
             achievements[0] = true;
-            showAlert(0);
+            showAlert(0, context);
         }
         if (correctPlays >= 50 && !achievements[1]) {
             achievements[1] = true;
-            showAlert(1);
+            showAlert(1, context);
         }
         if (correctPlays >= 100 && !achievements[2]) {
             achievements[2] = true;
-            showAlert(2);
+            showAlert(2, context);
         }
         if (correctPlays >= 1000 && !achievements[3]) {
             achievements[3] = true;
-            showAlert(3);
+            showAlert(3, context);
         }
         if (correctPlays >= 5000 && !achievements[4]) {
             achievements[4] = true;
-            showAlert(4);
+            showAlert(4, context);
         }
         if (correctPlays >= 100000 && !achievements[5]) {
             achievements[5] = true;
-            showAlert(5);
+            showAlert(5, context);
         }
 
 
         if (consecutiveDays >= 5 && !achievements[6]) {
             achievements[6] = true;
-            showAlert(6);
+            showAlert(6, context);
         }
         if (consecutiveDays >= 10 && !achievements[7]) {
             achievements[7] = true;
-            showAlert(7);
+            showAlert(7, context);
         }
         if (consecutiveDays >= 100 && !achievements[8]) {
             achievements[8] = true;
-            showAlert(8);
+            showAlert(8, context);
         }
 
 
         if (bestReactionTime <= 500 && !achievements[9]) {
             achievements[9] = true;
-            showAlert(9);
+            showAlert(9, context);
         }
         if (bestReactionTime <= 400 && !achievements[10]) {
             achievements[10] = true;
-            showAlert(10);
+            showAlert(10, context);
         }
         if (bestReactionTime <= 300 && !achievements[11]) {
             achievements[11] = true;
-            showAlert(11);
+            showAlert(11, context);
         }
         if (bestReactionTime <= 200 && !achievements[12]) {
             achievements[12] = true;
-            showAlert(12);
+            showAlert(12, context);
         }
         if (bestReactionTime <= 100 && !achievements[13]) {
             achievements[13] = true;
-            showAlert(13);
+            showAlert(13, context);
         }
         if (bestReactionTime <= 50 && !achievements[14]) {
             achievements[14] = true;
-            showAlert(14);
+            showAlert(14, context);
         }
 
 
         if (randomClicks >= 5 && !achievements[15]) {
             achievements[15] = true;
-            showAlert(15);
+            showAlert(15, context);
         }
         if (randomClicks >= 10 && !achievements[16]) {
             achievements[16] = true;
-            showAlert(16);
+            showAlert(16, context);
         }
         if (randomClicks >= 15 && !achievements[17]) {
             achievements[17] = true;
-            showAlert(17);
+            showAlert(17, context);
         }
         if (randomClicks >= 20 && !achievements[18]) {
             achievements[18] = true;
-            showAlert(18);
+            showAlert(18, context);
         }
         if (randomClicks >= 25 && !achievements[19]) {
             achievements[19] = true;
-            showAlert(19);
+            showAlert(19, context);
         }
         if (randomClicks >= 30 && !achievements[20]) {
             achievements[20] = true;
-            showAlert(20);
+            showAlert(20, context);
         }
 
 
         if (multiPlayerGames >= 100 && !achievements[21]) {
             achievements[21] = true;
-            showAlert(21);
+            showAlert(21, context);
         }
         if (multiPlayerGames >= 1000 && !achievements[22]) {
             achievements[22] = true;
-            showAlert(22);
+            showAlert(22, context);
         }
         if (multiPlayerGames >= 100000 && !achievements[23]) {
             achievements[23] = true;
-            showAlert(23);
+            showAlert(23, context);
         }
 
 
         if (worstReactionTime >= 1000000 && !achievements[24]) {
             achievements[24] = true;
-            showAlert(24);
+            showAlert(24, context);
         }
         if (wrongPlays >= 100 && !achievements[25]) {
             achievements[25] = true;
-            showAlert(25);
+            showAlert(25, context);
         }
 
 
         if (completedObjectives == 27 && !achievements[26]) {
             achievements[26] = true;
-            showAlert(26);
+            showAlert(26, context);
         }
     }
 
-    private void showAlert(int i) {
+    private void showAlert(int i, Context context) {
         String message = "";
         switch (i) {
             case 0:

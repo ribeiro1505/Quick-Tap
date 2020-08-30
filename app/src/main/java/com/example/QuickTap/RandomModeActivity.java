@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -143,6 +144,8 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void showNewGame() {
+        updatePlayerStats();
+
         timeInterval = 1000;
         clicks = 0;
 
@@ -159,8 +162,6 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void newGame() {
-        updatePlayerStats();
-
         handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
@@ -197,9 +198,10 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void loadHighScore() {
-        if (playerStats.randomClicks == 0)
+        if (playerStats.randomClicks == 0) {
             highScoreText.setVisibility(View.INVISIBLE);
-        else{
+            showTutorial();
+        } else {
             highScoreText.setText("HighScore: " + playerStats.randomClicks);
             highScoreText.setVisibility(View.VISIBLE);
         }
@@ -296,6 +298,19 @@ public class RandomModeActivity extends AppCompatActivity {
 
     private void showFullScreenAdd() {
         mInterstitialAd.show();
+    }
+
+
+    //********************     AUX METHODS     ********************
+
+    private void showTutorial() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Tutorial").
+                setMessage("Tap the yellow circle as fast as you can." +
+                        "\n\nAfter each tap, the time the circle stays on the screen decreases." +
+                        "\n\nHave fun!")
+                .create()
+                .show();
     }
 
 }

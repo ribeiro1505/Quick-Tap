@@ -2,7 +2,7 @@
     <string name="app_name">Quick! Tap</string>
 
     <string name="unlockAchievement">To unlock this Achievement you must:</string>
-    <string name="achievementUnlocked">You have already unlocked this Achievement</string>
+    <string name="achievementUnlocked">You have already unlocked this Achievement!\n</string>
     <string name="newAchievement">Congratulations!\nYou\'ve unlocked a new Achievement!</string>
 
     <string-array name="achievementsSentences">

@@ -131,10 +131,12 @@ public class ClassicModeActivity extends AppCompatActivity {
     }
 
     private void showNewGame() {
+        updatePlayerStats();
+
         plays++;
-        if (plays == 8)
+        if (plays == 4)
             loadFullScreenAdd();
-        else if (plays == 10) {
+        else if (plays == 5) {
             plays = 0;
             showFullScreenAdd();
         }
@@ -147,8 +149,6 @@ public class ClassicModeActivity extends AppCompatActivity {
     }
 
     private void newGame() {
-        updatePlayerStats();
-
         handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
