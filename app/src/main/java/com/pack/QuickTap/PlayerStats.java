@@ -1,4 +1,4 @@
-package com.example.QuickTap;
+package com.pack.QuickTap;
 
 import android.app.AlertDialog;
 import android.content.Context;

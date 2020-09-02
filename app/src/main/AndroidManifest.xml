@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.QuickTap">
+    package="com.pack.QuickTap">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -9,16 +9,16 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/QuickTap">
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3011084940320368~7502134274"/>
+            android:value="ca-app-pub-1816824579575646~9499921272"/>
 
         <activity
-            android:name="com.example.QuickTap.MainPageActivity"
+            android:name="com.pack.QuickTap.MainPageActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -27,19 +27,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.QuickTap.ClassicModeActivity"
+            android:name="com.pack.QuickTap.ClassicModeActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.example.QuickTap.RandomModeActivity"
+            android:name="com.pack.QuickTap.RandomModeActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.example.QuickTap.MultiPlayerModeActivity"
+            android:name="com.pack.QuickTap.MultiPlayerModeActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.example.QuickTap.AchievementsActivity"
+            android:name="com.pack.QuickTap.AchievementsActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
     </application>

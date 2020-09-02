@@ -1,4 +1,4 @@
-package com.example.QuickTap;
+package com.pack.QuickTap;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ public class MainPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.main_page);
 
         loadAds();
@@ -99,18 +101,16 @@ public class MainPageActivity extends AppCompatActivity {
                 (lastDay == 365 && thisDay == 1) ||
                 (lastDay == 366 && thisDay == 1)) {
             playerStats.consecutiveDays++;
+            new AlertDialog.Builder(this)
+                    .setTitle("You've been playing for " + playerStats.consecutiveDays + " consecutive days!\n" +
+                            "Keep playing daily to win Achievements!\n")
+                    .show();
             playerStats.checkForAchievements(this);
         } else if (lastDay != thisDay) {
             playerStats.consecutiveDays = 1;
         }
         playerStats.lastOnlineDay = thisDay;
         updatePlayerStats();
-
-        if (playerStats.consecutiveDays > 1)
-            new AlertDialog.Builder(this)
-                    .setTitle("You've been playing for " + playerStats.consecutiveDays + " consecutive days!\n" +
-                            "Keep playing daily to win Achievements!")
-                    .show();
     }
 
     private void createPlayerStats() {

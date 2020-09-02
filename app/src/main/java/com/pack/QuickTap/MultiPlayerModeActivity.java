@@ -1,4 +1,4 @@
-package com.example.QuickTap;
+package com.pack.QuickTap;
 
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
@@ -9,11 +9,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
@@ -37,12 +39,13 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     SharedPreferences sharedPref;
     private PlayerStats playerStats;
     Gson gson;
+    private InterstitialAd mInterstitialAd;
 
     private boolean isTopPlayerReady, isBottomPlayerReady = false;
     private boolean canClick = false;
 
     private int randomInstant;
-    private int topPlayerScoreValue, bottomPlayerScoreValue = 0;
+    private int topPlayerScoreValue, bottomPlayerScoreValue, plays = 0;
 
 
     //********************     RUNNABLES     ********************
@@ -68,6 +71,7 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.mode_multiplayer);
 
         loadAds();
@@ -99,6 +103,14 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
     private void showNewGame() {
         updatePlayerStats();
+
+        plays++;
+        if (plays == 2)
+            loadFullScreenAdd();
+        else if (plays == 3) {
+            plays = 0;
+            showFullScreenAdd();
+        }
 
         topPlayer.setVisibility(View.VISIBLE);
         bottomPlayer.setVisibility(View.VISIBLE);
@@ -233,6 +245,17 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/7547711201");
+    }
+
+    private void loadFullScreenAdd() {
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void showFullScreenAdd() {
+        mInterstitialAd.show();
     }
 
 

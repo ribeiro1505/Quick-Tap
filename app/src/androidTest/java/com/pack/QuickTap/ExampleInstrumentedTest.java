@@ -1,4 +1,4 @@
-package com.example.QuickTap;
+package com.pack.QuickTap;
 
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;

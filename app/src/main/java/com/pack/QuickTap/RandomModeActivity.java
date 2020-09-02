@@ -1,13 +1,18 @@
-package com.example.QuickTap;
+package com.pack.QuickTap;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.AbsoluteLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -23,40 +28,48 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-public class ClassicModeActivity extends AppCompatActivity {
+public class RandomModeActivity extends AppCompatActivity {
 
     private static final int MIN = 1;
-    private static final int MAX = 10;
+    private static final int MAX = 2;
 
-    private SharedPreferences sharedPref;
-    private TextView timeCounter, highScoreText;
-    private ConstraintLayout background;
-
-    ScheduledExecutorService scheduler;
-    ScheduledFuture<?> future;
+    TextView startButton, highScoreText;
+    ImageView clickButton;
+    ConstraintLayout background;
 
     Handler handler;
     MediaPlayer mp;
     private InterstitialAd mInterstitialAd;
+
+    SharedPreferences sharedPref;
     private PlayerStats playerStats;
     Gson gson;
 
-    private int count;
-    private int plays = 0;
-    private boolean canClick = false;
+    private int timeInterval = 1000;
+    private int clicks, plays = 0;
+    private boolean clicked = false;
+
 
     //********************     RUNNABLES     ********************
 
     Runnable canClickRunnable = new Runnable() {
         @Override
         public void run() {
+            mp.seekTo(0);
             mp.start();
             canClick();
+        }
+    };
+
+    Runnable cantClickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            clickButton.setVisibility(View.INVISIBLE);
+            if (!clicked)
+                incorrectClick();
+            else
+                startGame();
         }
     };
 
@@ -64,39 +77,30 @@ public class ClassicModeActivity extends AppCompatActivity {
         @Override
         public void run() {
             showNewGame();
+            startGameListener();
         }
     };
 
-    Runnable gameRunnable = new Runnable() {
-        @Override
-        public void run() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (canClick) {
-                        timeCounter.setText(++count + " ms");
-                    }
-                }
-            });
-        }
-    };
 
     //********************     ACTIVITY     ********************
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.mode_classic);
-
-        loadAds();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.mode_random);
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
         playerStats = getPlayerStats();
-        mp = MediaPlayer.create(this, R.raw.gun_sound);
 
-        timeCounter = findViewById(R.id.timeCounter);
+        startButton = findViewById(R.id.startButton);
         highScoreText = findViewById(R.id.highScore);
+        clickButton = findViewById(R.id.clickButton);
         background = findViewById(R.id.mainLayout);
+        clickButton.setVisibility(View.INVISIBLE);
+
+        loadAds();
+        mp = MediaPlayer.create(this, R.raw.gun_sound);
 
         highScoreText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,15 +108,14 @@ public class ClassicModeActivity extends AppCompatActivity {
                 shareHighScore();
             }
         });
+
         loadHighScore();
-        startGameListeners();
+        startGameListener();
     }
 
     private void startGame() {
-        timeCounter.setVisibility(View.INVISIBLE);
+        clicked = false;
         int randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
-        count = 0;
-        canClick = false;
 
         playGameListeners();
 
@@ -121,31 +124,43 @@ public class ClassicModeActivity extends AppCompatActivity {
     }
 
     private void canClick() {
-        canClick = true;
-        background.setBackgroundColor(getColor(R.color.yellowBackground));
-        timeCounter.setText(count + " ms");
-        timeCounter.setVisibility(View.VISIBLE);
+        AbsoluteLayout.LayoutParams absParams =
+                (AbsoluteLayout.LayoutParams) clickButton.getLayoutParams();
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int width = (int) (displaymetrics.widthPixels * 0.7);
+        int height = (int) (displaymetrics.heightPixels * 0.6);
 
-        scheduler = Executors.newScheduledThreadPool(1);
-        future = scheduler.scheduleAtFixedRate(gameRunnable, 0, 1, TimeUnit.MILLISECONDS);
+        Random r = new Random();
+
+        absParams.x = r.nextInt(width);
+        absParams.y = r.nextInt(height);
+        clickButton.setLayoutParams(absParams);
+
+        clickButton.setVisibility(View.VISIBLE);
+
+        handler = new Handler();
+        handler.postDelayed(cantClickRunnable, timeInterval);
+        if (timeInterval > 200)
+            timeInterval *= 0.95;
     }
 
     private void showNewGame() {
         updatePlayerStats();
 
+        timeInterval = 1000;
+        clicks = 0;
+
         plays++;
-        if (plays == 4)
+        if (plays == 1)
             loadFullScreenAdd();
-        else if (plays == 5) {
+        else if (plays == 2) {
             plays = 0;
             showFullScreenAdd();
         }
 
-        timeCounter.setVisibility(View.VISIBLE);
-        timeCounter.setText("START");
+        startButton.setVisibility(View.VISIBLE);
         background.setBackgroundColor(getColor(R.color.white));
-
-        startGameListeners();
     }
 
     private void newGame() {
@@ -156,111 +171,89 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     //********************     CLICK TESTS     ********************
 
-    private void checkClick() {
-        if (canClick)
-            correctClick();
-        else
-            incorrectClick();
-    }
-
     private void correctClick() {
-        canClick = false;
+        clicks++;
+        setHighScoreText(clicks);
+        endGameListeners();
 
-        scheduler.shutdown();
-        handler.removeCallbacks(gameRunnable);
-        future.cancel(true);
-
-        background.setBackgroundColor(getColor(R.color.greenBackgroud));
-        timeCounter.setText(count + " ms");
-        setHighScore(count);
-        updateCorrectPlays();
-        updatePlayerScores(count);
-
-        newGame();
+        clicked = true;
+        clickButton.setVisibility(View.INVISIBLE);
+        startGame();
     }
 
     private void incorrectClick() {
-        canClick = false;
+        clicked = false;
+        endGameListeners();
+
+        clickButton.setVisibility(View.INVISIBLE);
         background.setBackgroundColor(getColor(R.color.redBackground));
-        updateIncorrectPlays();
         newGame();
     }
 
 
     //********************     HIGH SCORES     ********************
 
+    private void setHighScoreText(int newScore) {
+        if (playerStats.randomClicks == 0 || newScore > playerStats.randomClicks)
+            playerStats.randomClicks = newScore;
+        loadHighScore();
+    }
+
     private void loadHighScore() {
-        if (playerStats.bestReactionTime == Integer.MAX_VALUE) {
+        if (playerStats.randomClicks == 0) {
             highScoreText.setVisibility(View.INVISIBLE);
             showTutorial();
         } else {
+            highScoreText.setText("HighScore: " + playerStats.randomClicks);
             highScoreText.setVisibility(View.VISIBLE);
-            highScoreText.setText(String.format("HighScore: %d ms", playerStats.bestReactionTime));
         }
-    }
-
-    private void setHighScore(int newScore) {
-        if (playerStats.bestReactionTime == Integer.MAX_VALUE || newScore < playerStats.bestReactionTime)
-            playerStats.bestReactionTime = newScore;
-        loadHighScore();
     }
 
     private void shareHighScore() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, playerStats.bestReactionTime + " ms is my best reaction time!\n\n" +
-                "Download the App at https://drive.google.com/drive/folders/1KEt8E7u--aW24HIu11ghAFWDnKlgh2kY?usp=sharing");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, playerStats.randomClicks + " clicks is my best score in random mode!\n\n" +
+                "Download the App at https://play.google.com/store/apps/details?id=com.pack.reactiongame");
         startActivity(Intent.createChooser(shareIntent, "Share text via"));
     }
 
 
     //********************     LISTENERS     ********************
 
-    private void startGameListeners() {
-        timeCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timeCounter.setOnClickListener(null);
-                startGame();
-            }
-        });
-        background.setOnClickListener(null);
-    }
-
     private void playGameListeners() {
         background.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 endGameListeners();
-                checkClick();
+                incorrectClick();
             }
         });
-        timeCounter.setOnClickListener(new View.OnClickListener() {
+        clickButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 endGameListeners();
-                checkClick();
+                correctClick();
+            }
+        });
+    }
+
+    private void startGameListener() {
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startButton.setOnClickListener(null);
+                startButton.setVisibility(View.INVISIBLE);
+                startGame();
             }
         });
     }
 
     private void endGameListeners() {
+        mp.pause();
         handler.removeCallbacks(canClickRunnable);
+        handler.removeCallbacks(cantClickRunnable);
         background.setOnClickListener(null);
-        timeCounter.setOnClickListener(null);
-    }
-
-
-    //********************     AUX METHODS     ********************
-
-    private void showTutorial() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Tutorial").
-                setMessage("Tap the screen as soon as you ear the sound or see the color." +
-                        "\n\nTo share your highScore, tap it." +
-                        "\n\nHave fun!")
-                .create()
-                .show();
+        clickButton.setOnClickListener(null);
     }
 
 
@@ -272,23 +265,6 @@ public class ClassicModeActivity extends AppCompatActivity {
         Type type = new TypeToken<PlayerStats>() {
         }.getType();
         return gson.fromJson(json, type);
-    }
-
-    private void updateCorrectPlays() {
-        playerStats.correctPlays++;
-    }
-
-    private void updateIncorrectPlays() {
-        playerStats.wrongPlays++;
-    }
-
-    private void updatePlayerScores(int count) {
-        if (playerStats.bestReactionTime > count) {
-            playerStats.bestReactionTime = count;
-        }
-        if (playerStats.worstReactionTime < count) {
-            playerStats.worstReactionTime = count;
-        }
     }
 
     private void updatePlayerStats() {
@@ -303,14 +279,6 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     //********************     ADS METHODS     ********************
 
-    private void loadFullScreenAdd() {
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void showFullScreenAdd() {
-        mInterstitialAd.show();
-    }
-
     private void loadAds() {
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
@@ -323,6 +291,29 @@ public class ClassicModeActivity extends AppCompatActivity {
         mAdView.loadAd(adRequest);
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/7547711201");
     }
+
+    private void loadFullScreenAdd() {
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void showFullScreenAdd() {
+        mInterstitialAd.show();
+    }
+
+
+    //********************     AUX METHODS     ********************
+
+    private void showTutorial() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Tutorial").
+                setMessage("Tap the yellow circle as fast as you can." +
+                        "\n\nAfter each tap, the time the circle stays on the screen decreases." +
+                        "\n\nTo share your highScore, tap it." +
+                        "\n\nHave fun!")
+                .create()
+                .show();
+    }
+
 }
