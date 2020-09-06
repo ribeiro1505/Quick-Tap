@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.QuickContactBadge;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -27,7 +28,7 @@ import java.util.Calendar;
 public class MainPageActivity extends AppCompatActivity {
 
     TextView classicMode, randomMode, multiPlayerMode;
-    ImageView achievements;
+    ImageView achievements, info;
 
     PlayerStats playerStats;
 
@@ -58,11 +59,27 @@ public class MainPageActivity extends AppCompatActivity {
         randomMode = findViewById(R.id.randomMode);
         multiPlayerMode = findViewById(R.id.multMode);
         achievements = findViewById(R.id.achievements);
+        info = findViewById(R.id.info);
 
         setClickListeners();
     }
 
     private void setClickListeners() {
+        achievements.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainPageActivity.this, AchievementsActivity.class));
+            }
+        });
+
+        info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainPageActivity.this, InfoActivity.class));
+            }
+        });
+
+
         classicMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,13 +98,6 @@ public class MainPageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainPageActivity.this, MultiPlayerModeActivity.class));
-            }
-        });
-
-        achievements.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainPageActivity.this, AchievementsActivity.class));
             }
         });
     }

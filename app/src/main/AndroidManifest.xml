@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pack.QuickTap">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +15,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1816824579575646~9499921272"/>
+            android:value="ca-app-pub-1816824579575646~9499921272" />
 
         <activity
             android:name="com.pack.QuickTap.MainPageActivity"
@@ -40,6 +40,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name="com.pack.QuickTap.AchievementsActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.pack.QuickTap.InfoActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
     </application>
