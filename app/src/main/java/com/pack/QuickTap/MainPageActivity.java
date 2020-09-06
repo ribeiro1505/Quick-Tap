@@ -97,13 +97,14 @@ public class MainPageActivity extends AppCompatActivity {
         int thisDay = c.get(Calendar.DAY_OF_YEAR);
         int lastDay = playerStats.lastOnlineDay;
 
+
         if (lastDay == thisDay - 1 ||
                 (lastDay == 365 && thisDay == 1) ||
                 (lastDay == 366 && thisDay == 1)) {
             playerStats.consecutiveDays++;
             new AlertDialog.Builder(this)
-                    .setTitle("You've been playing for " + playerStats.consecutiveDays + " consecutive days!\n" +
-                            "Keep playing daily to win Achievements!\n")
+                    .setMessage("You've been playing for " + playerStats.consecutiveDays + " consecutive days!\n" +
+                            "Keep playing daily to win Achievements!")
                     .show();
             playerStats.checkForAchievements(this);
         } else if (lastDay != thisDay) {
