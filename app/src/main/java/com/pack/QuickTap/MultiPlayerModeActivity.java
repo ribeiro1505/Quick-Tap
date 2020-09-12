@@ -27,8 +27,8 @@ import java.util.Random;
 
 public class MultiPlayerModeActivity extends AppCompatActivity {
 
-    private static final int MIN = 1;
-    private static final int MAX = 10;
+    private static final int MIN = 1000;
+    private static final int MAX = 5000;
 
     TextView topPlayer, bottomPlayer, topPlayerScore, bottomPlayerScore;
     ImageView topBackground, bottomBackground;
@@ -153,7 +153,7 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         playGameListeners();
 
         handler = new Handler();
-        handler.postDelayed(canClickRunnable, randomInstant * 1000);
+        handler.postDelayed(canClickRunnable, randomInstant);
     }
 
     private void canClick() {
@@ -247,7 +247,7 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         mAdView.loadAd(adRequest);
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/7547711201");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/3791851914");
     }
 
     private void loadFullScreenAdd() {

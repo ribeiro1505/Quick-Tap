@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ClassicModeActivity extends AppCompatActivity {
 
-    private static final int MIN = 1;
-    private static final int MAX = 10;
+    private static final int MIN = 1000;
+    private static final int MAX = 5000;
 
     private SharedPreferences sharedPref;
     private TextView timeCounter, highScoreText;
@@ -119,7 +119,7 @@ public class ClassicModeActivity extends AppCompatActivity {
         playGameListeners();
 
         handler = new Handler();
-        handler.postDelayed(canClickRunnable, randomInstant * 1000);
+        handler.postDelayed(canClickRunnable, randomInstant);
     }
 
     private void canClick() {
@@ -258,7 +258,7 @@ public class ClassicModeActivity extends AppCompatActivity {
     private void showTutorial() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Tutorial").
-                setMessage("Tap the screen as soon as you ear the sound or see the color." +
+                setMessage("Tap the screen as soon as you hear the sound or see the color." +
                         "\n\nTo share your highScore, tap it." +
                         "\n\nHave fun!")
                 .create()
@@ -325,6 +325,6 @@ public class ClassicModeActivity extends AppCompatActivity {
         mAdView.loadAd(adRequest);
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/7547711201");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/3791851914");
     }
 }

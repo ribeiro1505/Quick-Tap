@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.QuickContactBadge;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -42,17 +41,7 @@ public class MainPageActivity extends AppCompatActivity {
         setContentView(R.layout.main_page);
 
         loadAds();
-
-        sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
-        //sharedPref.edit().putString("PlayerStats", null).apply();
-        String json = sharedPref.getString("PlayerStats", null);
-        if (json == null) {
-            createPlayerStats();
-        } else {
-            Type type = new TypeToken<PlayerStats>() {
-            }.getType();
-            playerStats = new Gson().fromJson(json, type);
-        }
+        loadSharedPrefs();
         checkDate();
 
         classicMode = findViewById(R.id.classicMode);
@@ -83,6 +72,7 @@ public class MainPageActivity extends AppCompatActivity {
         classicMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                loadSharedPrefs();
                 startActivity(new Intent(MainPageActivity.this, ClassicModeActivity.class));
             }
         });
@@ -90,16 +80,48 @@ public class MainPageActivity extends AppCompatActivity {
         randomMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainPageActivity.this, RandomModeActivity.class));
+                loadSharedPrefs();
+                if (playerStats.canRandomMode())
+                    startActivity(new Intent(MainPageActivity.this, RandomModeActivity.class));
+                else
+                    new AlertDialog.Builder(MainPageActivity.this)
+                            .setTitle("Game Mode Locked")
+                            .setMessage("To unlock this game mode you must:\n\n" +
+                                    ". Play at least 5 correct games in Classic Mode;\n" +
+                                    ". Have a reaction time less than 300ms\n")
+                            .create().show();
             }
         });
 
         multiPlayerMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainPageActivity.this, MultiPlayerModeActivity.class));
+                loadSharedPrefs();
+                if (playerStats.canMultiPlayer())
+                    startActivity(new Intent(MainPageActivity.this, MultiPlayerModeActivity.class));
+                else
+                    new AlertDialog.Builder(MainPageActivity.this)
+                            .setTitle("Game Mode Locked")
+                            .setMessage("To unlock this game mode you must:\n\n" +
+                                    ". Play at least 50 correct games in Classic Mode;\n" +
+                                    ". Have a reaction time less than 200ms\n" +
+                                    ". Have at least 20 points in Random Mode")
+                            .create().show();
             }
         });
+    }
+
+    private void loadSharedPrefs() {
+        sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
+        //sharedPref.edit().putString("PlayerStats", null).apply();
+        String json = sharedPref.getString("PlayerStats", null);
+        if (json == null) {
+            createPlayerStats();
+        } else {
+            Type type = new TypeToken<PlayerStats>() {
+            }.getType();
+            playerStats = new Gson().fromJson(json, type);
+        }
     }
 
     private void checkDate() {

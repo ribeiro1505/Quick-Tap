@@ -31,8 +31,8 @@ import java.util.Random;
 
 public class RandomModeActivity extends AppCompatActivity {
 
-    private static final int MIN = 1;
-    private static final int MAX = 2;
+    private static final int MIN = 500;
+    private static final int MAX = 2000;
 
     TextView startButton, highScoreText;
     ImageView clickButton;
@@ -120,7 +120,7 @@ public class RandomModeActivity extends AppCompatActivity {
         playGameListeners();
 
         handler = new Handler();
-        handler.postDelayed(canClickRunnable, randomInstant * 1000);
+        handler.postDelayed(canClickRunnable, randomInstant);
     }
 
     private void canClick() {
@@ -291,7 +291,7 @@ public class RandomModeActivity extends AppCompatActivity {
         mAdView.loadAd(adRequest);
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/7547711201");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/3791851914");
     }
 
     private void loadFullScreenAdd() {
