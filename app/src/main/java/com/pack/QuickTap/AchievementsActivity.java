@@ -180,7 +180,6 @@ public class AchievementsActivity extends AppCompatActivity {
                             public void onShow(DialogInterface arg) {
                                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.black));
                                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.black));
-
                             }
                         });
                         dialog.show();

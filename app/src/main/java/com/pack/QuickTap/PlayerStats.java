@@ -2,6 +2,7 @@ package com.pack.QuickTap;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 
 public class PlayerStats {
 
@@ -195,11 +196,11 @@ public class PlayerStats {
             checkForRandomMode(context);
             showAlert(0, context);
         }
-
     }
 
-    private void showAlert(int i, Context context) {
+    private void showAlert(int i, final Context context) {
         String message = "";
+        final int position = i;
         switch (i) {
             case 0:
                 message = context.getResources().getStringArray(R.array.newAchievementMessage)[0];
@@ -285,7 +286,7 @@ public class PlayerStats {
         }
         new AlertDialog.Builder(context)
                 .setTitle(context.getString(R.string.newAchievement))
-                .setMessage(message)
-                .show();
+                .setMessage(message + "\n\nYou can now set a new Background Theme in the Achievements Tab")
+                .create().show();
     }
 }
