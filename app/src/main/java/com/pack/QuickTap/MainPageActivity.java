@@ -7,7 +7,9 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -28,11 +30,22 @@ public class MainPageActivity extends AppCompatActivity {
 
     TextView classicMode, randomMode, multiPlayerMode;
     ImageView achievements, info;
+    ConstraintLayout background;
 
     PlayerStats playerStats;
 
     SharedPreferences sharedPref;
     Gson gson = new Gson();
+
+    int[] backgrounds = {R.drawable.backgroun1, R.drawable.backgroun2, R.drawable.backgroun3,
+            R.drawable.backgroun4, R.drawable.backgroun5, R.drawable.backgroun6,
+            R.drawable.backgroun7, R.drawable.backgroun8, R.drawable.backgroun9,
+            R.drawable.backgroun10, R.drawable.backgroun11, R.drawable.backgroun12,
+            R.drawable.backgroun13, R.drawable.backgroun14, R.drawable.backgroun15,
+            R.drawable.backgroun16, R.drawable.backgroun17, R.drawable.backgroun18,
+            R.drawable.backgroun19, R.drawable.backgroun20, R.drawable.backgroun21,
+            R.drawable.backgroun22, R.drawable.backgroun23, R.drawable.backgroun24,
+            R.drawable.backgroun25, R.drawable.backgroun26, R.drawable.backgroun27};
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,9 +53,11 @@ public class MainPageActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.main_page);
 
-        loadAds();
+        background = findViewById(R.id.layout);
+
         loadSharedPrefs();
         checkDate();
+        loadBackGround();
 
         classicMode = findViewById(R.id.classicMode);
         randomMode = findViewById(R.id.randomMode);
@@ -51,6 +66,14 @@ public class MainPageActivity extends AppCompatActivity {
         info = findViewById(R.id.info);
 
         setClickListeners();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        loadAds();
+        loadSharedPrefs();
+        loadBackGround();
     }
 
     private void setClickListeners() {
@@ -129,7 +152,6 @@ public class MainPageActivity extends AppCompatActivity {
         int thisDay = c.get(Calendar.DAY_OF_YEAR);
         int lastDay = playerStats.lastOnlineDay;
 
-
         if (lastDay == thisDay - 1 ||
                 (lastDay == 365 && thisDay == 1) ||
                 (lastDay == 366 && thisDay == 1)) {
@@ -164,6 +186,11 @@ public class MainPageActivity extends AppCompatActivity {
         String json = gson.toJson(playerStats);
         editor.putString("PlayerStats", json);
         editor.apply();
+    }
+
+    private void loadBackGround(){
+        if(playerStats.background != -1)
+            background.setBackgroundResource(backgrounds[playerStats.background]);
     }
 
     private void loadAds() {

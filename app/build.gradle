@@ -8,8 +8,8 @@ android {
         applicationId "com.pack.reactiongame"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 9
-        versionName "1.9"
+        versionCode 15
+        versionName "1.9.15"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }

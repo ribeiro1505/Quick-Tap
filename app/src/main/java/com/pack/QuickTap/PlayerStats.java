@@ -15,10 +15,12 @@ public class PlayerStats {
             worstReactionTime,
             multiPlayerGames,
             completedObjectives,
-            randomClicks;
+            randomClicks,
+            background;
 
     public PlayerStats() {
         this.achievements = new boolean[27];
+        //this.achievements = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true};
         this.correctPlays = 0;
         this.wrongPlays = 0;
         this.consecutiveDays = 1;
@@ -28,6 +30,7 @@ public class PlayerStats {
         this.multiPlayerGames = 0;
         this.completedObjectives = 0;
         this.randomClicks = 0;
+        this.background = -1;
     }
 
     public boolean canRandomMode() {

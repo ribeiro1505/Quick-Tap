@@ -7,6 +7,7 @@ import android.os.Handler;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.view.View;
 import android.view.WindowManager;
@@ -32,6 +33,7 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
     TextView topPlayer, bottomPlayer, topPlayerScore, bottomPlayerScore;
     ImageView topBackground, bottomBackground;
+    ConstraintLayout background;
 
     Handler handler;
     MediaPlayer mp;
@@ -46,6 +48,16 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
     private int randomInstant;
     private int topPlayerScoreValue, bottomPlayerScoreValue, plays = 0;
+
+    int[] backgrounds = {R.drawable.backgroun1, R.drawable.backgroun2, R.drawable.backgroun3,
+            R.drawable.backgroun4, R.drawable.backgroun5, R.drawable.backgroun6,
+            R.drawable.backgroun7, R.drawable.backgroun8, R.drawable.backgroun9,
+            R.drawable.backgroun10, R.drawable.backgroun11, R.drawable.backgroun12,
+            R.drawable.backgroun13, R.drawable.backgroun14, R.drawable.backgroun15,
+            R.drawable.backgroun16, R.drawable.backgroun17, R.drawable.backgroun18,
+            R.drawable.backgroun19, R.drawable.backgroun20, R.drawable.backgroun21,
+            R.drawable.backgroun22, R.drawable.backgroun23, R.drawable.backgroun24,
+            R.drawable.backgroun25, R.drawable.backgroun26, R.drawable.backgroun27};
 
 
     //********************     RUNNABLES     ********************
@@ -76,9 +88,11 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
         loadAds();
 
+        background = findViewById(R.id.layout);
         mp = MediaPlayer.create(this, R.raw.gun_sound);
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
         playerStats = getPlayerStats();
+        loadBackGround();
 
         topPlayer = findViewById(R.id.topPlayer);
         topBackground = findViewById(R.id.topBackground);
@@ -101,6 +115,11 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
+    private void loadBackGround(){
+        if(playerStats.background != -1)
+            background.setBackgroundResource(backgrounds[playerStats.background]);
+    }
+
     private void showNewGame() {
         updatePlayerStats();
 
@@ -114,8 +133,8 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
         topPlayer.setVisibility(View.VISIBLE);
         bottomPlayer.setVisibility(View.VISIBLE);
-        topBackground.setBackgroundColor(getColor(R.color.white));
-        bottomBackground.setBackgroundColor(getColor(R.color.white));
+        topBackground.setBackgroundColor(0x00000000);
+        bottomBackground.setBackgroundColor(0x00000000);
         readyToPlay();
     }
 

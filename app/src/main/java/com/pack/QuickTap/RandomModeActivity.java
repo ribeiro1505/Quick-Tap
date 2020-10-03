@@ -50,6 +50,15 @@ public class RandomModeActivity extends AppCompatActivity {
     private int clicks, plays = 0;
     private boolean clicked = false;
 
+    int[] backgrounds = {R.drawable.backgroun1, R.drawable.backgroun2, R.drawable.backgroun3,
+            R.drawable.backgroun4, R.drawable.backgroun5, R.drawable.backgroun6,
+            R.drawable.backgroun7, R.drawable.backgroun8, R.drawable.backgroun9,
+            R.drawable.backgroun10, R.drawable.backgroun11, R.drawable.backgroun12,
+            R.drawable.backgroun13, R.drawable.backgroun14, R.drawable.backgroun15,
+            R.drawable.backgroun16, R.drawable.backgroun17, R.drawable.backgroun18,
+            R.drawable.backgroun19, R.drawable.backgroun20, R.drawable.backgroun21,
+            R.drawable.backgroun22, R.drawable.backgroun23, R.drawable.backgroun24,
+            R.drawable.backgroun25, R.drawable.backgroun26, R.drawable.backgroun27};
 
     //********************     RUNNABLES     ********************
 
@@ -168,6 +177,11 @@ public class RandomModeActivity extends AppCompatActivity {
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
+    private void loadBackGround(){
+        if(playerStats.background != -1)
+            background.setBackgroundResource(backgrounds[playerStats.background]);
+    }
+
 
     //********************     CLICK TESTS     ********************
 
@@ -238,6 +252,7 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void startGameListener() {
+        loadBackGround();
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -298,8 +313,7 @@ public class RandomModeActivity extends AppCompatActivity {
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
-    private void showFullScreenAdd() {
-        mInterstitialAd.show();
+    private void showFullScreenAdd() {mInterstitialAd.show();
     }
 
 
