@@ -34,7 +34,7 @@ public class RandomModeActivity extends AppCompatActivity {
     private static final int MIN = 500;
     private static final int MAX = 2000;
 
-    TextView startButton, highScoreText;
+    TextView startButton, highScoreText, currentScoreText;
     ImageView clickButton;
     ConstraintLayout background;
 
@@ -104,6 +104,7 @@ public class RandomModeActivity extends AppCompatActivity {
 
         startButton = findViewById(R.id.startButton);
         highScoreText = findViewById(R.id.highScore);
+        currentScoreText = findViewById(R.id.currentScore);
         clickButton = findViewById(R.id.clickButton);
         background = findViewById(R.id.mainLayout);
         clickButton.setVisibility(View.INVISIBLE);
@@ -123,6 +124,7 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void startGame() {
+        currentScoreText.setVisibility(View.VISIBLE);
         clicked = false;
         int randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
 
@@ -163,11 +165,13 @@ public class RandomModeActivity extends AppCompatActivity {
         plays++;
         if (plays == 1)
             loadFullScreenAdd();
-        else if (plays == 2) {
+        else if (plays == 10) {
             plays = 0;
             showFullScreenAdd();
         }
 
+        currentScoreText.setVisibility(View.GONE);
+        currentScoreText.setText("0");
         startButton.setVisibility(View.VISIBLE);
         background.setBackgroundColor(getColor(R.color.white));
     }
@@ -177,8 +181,8 @@ public class RandomModeActivity extends AppCompatActivity {
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
-    private void loadBackGround(){
-        if(playerStats.background != -1)
+    private void loadBackGround() {
+        if (playerStats.background != -1)
             background.setBackgroundResource(backgrounds[playerStats.background]);
     }
 
@@ -187,6 +191,7 @@ public class RandomModeActivity extends AppCompatActivity {
 
     private void correctClick() {
         clicks++;
+        currentScoreText.setText(String.valueOf(clicks));
         setHighScoreText(clicks);
         endGameListeners();
 
@@ -196,6 +201,7 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
     private void incorrectClick() {
+        currentScoreText.setText("You lost");
         clicked = false;
         endGameListeners();
 
@@ -313,7 +319,8 @@ public class RandomModeActivity extends AppCompatActivity {
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
-    private void showFullScreenAdd() {mInterstitialAd.show();
+    private void showFullScreenAdd() {
+        mInterstitialAd.show();
     }
 
 

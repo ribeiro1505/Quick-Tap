@@ -188,8 +188,8 @@ public class MainPageActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    private void loadBackGround(){
-        if(playerStats.background != -1)
+    private void loadBackGround() {
+        if (playerStats.background != -1)
             background.setBackgroundResource(backgrounds[playerStats.background]);
     }
 
