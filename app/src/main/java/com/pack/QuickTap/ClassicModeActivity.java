@@ -9,16 +9,15 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -146,9 +145,7 @@ public class ClassicModeActivity extends AppCompatActivity {
         updatePlayerStats();
 
         plays++;
-        if (plays == 2)
-            loadFullScreenAdd();
-        else if (plays == 3) {
+        if (plays == 3) {
             plays = 0;
             showFullScreenAdd();
         }
@@ -165,8 +162,8 @@ public class ClassicModeActivity extends AppCompatActivity {
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
-    private void loadBackGround(){
-        if(playerStats.background != -1)
+    private void loadBackGround() {
+        if (playerStats.background != -1)
             background.setBackgroundResource(backgrounds[playerStats.background]);
     }
 
@@ -321,26 +318,25 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     //********************     ADS METHODS     ********************
 
-    private void loadFullScreenAdd() {
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-    }
-
     private void showFullScreenAdd() {
-        mInterstitialAd.show();
+        mInterstitialAd.show(ClassicModeActivity.this);
     }
 
     private void loadAds() {
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
 
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/3791851914");
+        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest, // TEST
+        InterstitialAd.load(this, "ca-app-pub-1816824579575646/3791851914", adRequest, // REAL
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        mInterstitialAd = null;
+                    }
+                });
     }
 }

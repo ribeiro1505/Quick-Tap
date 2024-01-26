@@ -12,17 +12,16 @@ import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -99,6 +98,8 @@ public class RandomModeActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.mode_random);
 
+        loadAds();
+
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
         playerStats = getPlayerStats();
 
@@ -163,9 +164,7 @@ public class RandomModeActivity extends AppCompatActivity {
         clicks = 0;
 
         plays++;
-        if (plays == 1)
-            loadFullScreenAdd();
-        else if (plays == 10) {
+        if (plays == 10) {
             plays = 0;
             showFullScreenAdd();
         }
@@ -300,27 +299,26 @@ public class RandomModeActivity extends AppCompatActivity {
 
     //********************     ADS METHODS     ********************
 
-    private void loadAds() {
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-        AdView mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1816824579575646/3791851914");
-    }
-
-    private void loadFullScreenAdd() {
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-    }
-
     private void showFullScreenAdd() {
-        mInterstitialAd.show();
+        mInterstitialAd.show(RandomModeActivity.this);
+    }
+
+    private void loadAds() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest, // TEST
+        InterstitialAd.load(this, "ca-app-pub-1816824579575646/3791851914", adRequest, // REAL
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        mInterstitialAd = null;
+                    }
+                });
     }
 
 
