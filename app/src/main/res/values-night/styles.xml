@@ -1,0 +1,19 @@
+<resources>
+    <style name="QuickTap" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnBackground">@color/colorOnBackground</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:statusBarColor">@color/colorBackground</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.QuickTap.MediumComponent</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.QuickTap.Dialog</item>
+    </style>
+</resources>
