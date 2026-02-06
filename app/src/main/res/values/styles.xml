@@ -11,8 +11,7 @@
         <item name="colorOnSurface">@color/colorOnSurface</item>
 
         <item name="android:fontFamily">@font/poppins</item>
-        <item name="android:statusBarColor">@color/colorBackground</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowFullscreen">true</item>
         <item name="android:navigationBarColor">@color/colorBackground</item>
 
         <!-- Shape theming -->

@@ -9,8 +9,7 @@
         <item name="colorOnSurface">@color/colorOnSurface</item>
 
         <item name="android:fontFamily">@font/poppins</item>
-        <item name="android:statusBarColor">@color/colorBackground</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowFullscreen">true</item>
         <item name="android:navigationBarColor">@color/colorBackground</item>
 
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.QuickTap.MediumComponent</item>
