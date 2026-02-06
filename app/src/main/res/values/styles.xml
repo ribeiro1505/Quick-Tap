@@ -1,10 +1,79 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="QuickTap" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="colorAccent">@color/white</item>
+
+    <!-- Base application theme -->
+    <style name="QuickTap" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnBackground">@color/colorOnBackground</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:statusBarColor">@color/colorBackground</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+
+        <!-- Shape theming -->
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.QuickTap.MediumComponent</item>
+
+        <!-- Dialog theming -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.QuickTap.Dialog</item>
+    </style>
+
+    <!-- Shape appearance -->
+    <style name="ShapeAppearance.QuickTap.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_lg</item>
+    </style>
+
+    <!-- Dialog overlay -->
+    <style name="ThemeOverlay.QuickTap.Dialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.QuickTap.Dialog</item>
+    </style>
+
+    <style name="ShapeAppearance.QuickTap.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_lg</item>
+    </style>
+
+    <!-- ============ Text Appearances ============ -->
+
+    <style name="TextAppearance.QuickTap.DisplayLarge" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:textSize">50sp</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextAppearance.QuickTap.DisplayMedium" parent="TextAppearance.MaterialComponents.Headline2">
+        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextAppearance.QuickTap.HeadlineLarge" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.QuickTap.TitleMedium" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.QuickTap.BodyLarge" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">@font/poppins_regular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextAppearance.QuickTap.LabelLarge" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
 </resources>

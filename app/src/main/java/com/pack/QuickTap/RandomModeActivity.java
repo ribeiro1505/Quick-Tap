@@ -1,50 +1,55 @@
 package com.pack.QuickTap;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
+import android.os.Looper;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AbsoluteLayout;
+import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.Random;
 
-public class RandomModeActivity extends AppCompatActivity {
+public class RandomModeActivity extends BaseActivity {
 
     private static final int MIN = 500;
     private static final int MAX = 2000;
 
     TextView startButton, highScoreText, currentScoreText;
-    ImageView clickButton;
+    ImageView clickButton, backButton;
+    MaterialCardView retryButton;
     ConstraintLayout background;
 
-    Handler handler;
-    MediaPlayer mp;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Random random = new Random();
+    private final Gson gson = new Gson();
+    private MediaPlayer mp;
+    private SettingsManager settingsManager;
     private InterstitialAd mInterstitialAd;
 
     SharedPreferences sharedPref;
     private PlayerStats playerStats;
-    Gson gson;
 
+    private int availableWidth, availableHeight;
     private int timeInterval = 1000;
     private int clicks, plays = 0;
     private boolean clicked = false;
@@ -61,32 +66,26 @@ public class RandomModeActivity extends AppCompatActivity {
 
     //********************     RUNNABLES     ********************
 
-    Runnable canClickRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mp.seekTo(0);
+    private final Runnable canClickRunnable = () -> {
+        mp.seekTo(0);
+        if (settingsManager.isSoundEnabled()) {
             mp.start();
-            canClick();
         }
+        HapticHelper.vibrateShot(this);
+        canClick();
     };
 
-    Runnable cantClickRunnable = new Runnable() {
-        @Override
-        public void run() {
-            clickButton.setVisibility(View.INVISIBLE);
-            if (!clicked)
-                incorrectClick();
-            else
-                startGame();
-        }
+    private final Runnable cantClickRunnable = () -> {
+        clickButton.setVisibility(View.INVISIBLE);
+        if (!clicked)
+            incorrectClick();
+        else
+            startGame();
     };
 
-    Runnable showNewGameRunnable = new Runnable() {
-        @Override
-        public void run() {
-            showNewGame();
-            startGameListener();
-        }
+    private final Runnable showNewGameRunnable = () -> {
+        showNewGame();
+        startGameListener();
     };
 
 
@@ -95,11 +94,9 @@ public class RandomModeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.mode_random);
 
-        loadAds();
-
+        settingsManager = new SettingsManager(this);
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
         playerStats = getPlayerStats();
 
@@ -108,75 +105,82 @@ public class RandomModeActivity extends AppCompatActivity {
         currentScoreText = findViewById(R.id.currentScore);
         clickButton = findViewById(R.id.clickButton);
         background = findViewById(R.id.mainLayout);
+        backButton = findViewById(R.id.backButton);
+        retryButton = findViewById(R.id.retryButton);
         clickButton.setVisibility(View.INVISIBLE);
+
+        backButton.setOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
 
         loadAds();
         mp = MediaPlayer.create(this, R.raw.gun_sound);
 
-        highScoreText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                shareHighScore();
-            }
+        highScoreText.setOnClickListener(v -> shareHighScore());
+
+        final FrameLayout targetArea = findViewById(R.id.targetArea);
+        targetArea.post(() -> {
+            availableWidth = (int) (targetArea.getWidth() * 0.85);
+            availableHeight = (int) (targetArea.getHeight() * 0.85);
         });
 
         loadHighScore();
         startGameListener();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+        if (mp != null) {
+            mp.release();
+            mp = null;
+        }
+    }
+
     private void startGame() {
+        backButton.setVisibility(View.GONE);
+        retryButton.setVisibility(View.GONE);
         currentScoreText.setVisibility(View.VISIBLE);
         clicked = false;
-        int randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
+        int randomInstant = random.nextInt((MAX - MIN) + 1) + MIN;
 
         playGameListeners();
 
-        handler = new Handler();
         handler.postDelayed(canClickRunnable, randomInstant);
     }
 
     private void canClick() {
-        AbsoluteLayout.LayoutParams absParams =
-                (AbsoluteLayout.LayoutParams) clickButton.getLayoutParams();
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int width = (int) (displaymetrics.widthPixels * 0.7);
-        int height = (int) (displaymetrics.heightPixels * 0.6);
+        FrameLayout.LayoutParams params =
+                (FrameLayout.LayoutParams) clickButton.getLayoutParams();
 
-        Random r = new Random();
-
-        absParams.x = r.nextInt(width);
-        absParams.y = r.nextInt(height);
-        clickButton.setLayoutParams(absParams);
+        params.leftMargin = random.nextInt(Math.max(1, availableWidth));
+        params.topMargin = random.nextInt(Math.max(1, availableHeight));
+        clickButton.setLayoutParams(params);
 
         clickButton.setVisibility(View.VISIBLE);
+        animateDotAppear(clickButton);
 
-        handler = new Handler();
         handler.postDelayed(cantClickRunnable, timeInterval);
         if (timeInterval > 200)
             timeInterval *= 0.95;
     }
 
     private void showNewGame() {
-        updatePlayerStats();
+        backButton.setVisibility(View.VISIBLE);
 
         timeInterval = 1000;
         clicks = 0;
 
-        plays++;
-        if (plays == 10) {
-            plays = 0;
-            showFullScreenAdd();
-        }
-
         currentScoreText.setVisibility(View.GONE);
         currentScoreText.setText("0");
+        startButton.setText("START");
         startButton.setVisibility(View.VISIBLE);
-        background.setBackgroundColor(getColor(R.color.white));
+        background.setBackgroundColor(getColor(R.color.colorBackground));
     }
 
     private void newGame() {
-        handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
@@ -205,8 +209,23 @@ public class RandomModeActivity extends AppCompatActivity {
         endGameListeners();
 
         clickButton.setVisibility(View.INVISIBLE);
-        background.setBackgroundColor(getColor(R.color.redBackground));
-        newGame();
+        background.setBackgroundColor(getColor(R.color.redError));
+        backButton.setVisibility(View.VISIBLE);
+        retryButton.setVisibility(View.VISIBLE);
+
+        updatePlayerStats();
+        plays++;
+        if (plays == 10) {
+            plays = 0;
+            showFullScreenAdd();
+        }
+
+        retryButton.setOnClickListener(v -> {
+            retryButton.setOnClickListener(null);
+            retryButton.setVisibility(View.GONE);
+            showNewGame();
+            startGameListener();
+        });
     }
 
 
@@ -240,36 +259,27 @@ public class RandomModeActivity extends AppCompatActivity {
     //********************     LISTENERS     ********************
 
     private void playGameListeners() {
-        background.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endGameListeners();
-                incorrectClick();
-            }
+        background.setOnClickListener(v -> {
+            endGameListeners();
+            incorrectClick();
         });
-        clickButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endGameListeners();
-                correctClick();
-            }
+        clickButton.setOnClickListener(v -> {
+            endGameListeners();
+            correctClick();
         });
     }
 
     private void startGameListener() {
         loadBackGround();
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startButton.setOnClickListener(null);
-                startButton.setVisibility(View.INVISIBLE);
-                startGame();
-            }
+        startButton.setOnClickListener(v -> {
+            startButton.setOnClickListener(null);
+            startButton.setVisibility(View.INVISIBLE);
+            startGame();
         });
     }
 
     private void endGameListeners() {
-        mp.pause();
+        if (mp != null) mp.pause();
         handler.removeCallbacks(canClickRunnable);
         handler.removeCallbacks(cantClickRunnable);
         background.setOnClickListener(null);
@@ -277,10 +287,25 @@ public class RandomModeActivity extends AppCompatActivity {
     }
 
 
+    //********************     ANIMATIONS     ********************
+
+    private void animateDotAppear(View view) {
+        view.setScaleX(0f);
+        view.setScaleY(0f);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(view, "scaleX", 0f, 1f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(view, "scaleY", 0f, 1f);
+        scaleX.setDuration(120);
+        scaleY.setDuration(120);
+        scaleX.setInterpolator(new OvershootInterpolator());
+        scaleY.setInterpolator(new OvershootInterpolator());
+        scaleX.start();
+        scaleY.start();
+    }
+
+
     //********************     ACHIEVEMENTS     ********************
 
     private PlayerStats getPlayerStats() {
-        gson = new Gson();
         String json = sharedPref.getString("PlayerStats", null);
         Type type = new TypeToken<PlayerStats>() {
         }.getType();
@@ -290,7 +315,6 @@ public class RandomModeActivity extends AppCompatActivity {
     private void updatePlayerStats() {
         playerStats.checkForAchievements(this);
         SharedPreferences.Editor editor = sharedPref.edit();
-        gson = new Gson();
         String json = gson.toJson(playerStats);
         editor.putString("PlayerStats", json);
         editor.apply();
@@ -300,14 +324,15 @@ public class RandomModeActivity extends AppCompatActivity {
     //********************     ADS METHODS     ********************
 
     private void showFullScreenAdd() {
-        mInterstitialAd.show(RandomModeActivity.this);
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(RandomModeActivity.this);
+        }
     }
 
     private void loadAds() {
         AdRequest adRequest = new AdRequest.Builder().build();
 
-        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest, // TEST
-        InterstitialAd.load(this, "ca-app-pub-1816824579575646/3791851914", adRequest, // REAL
+        InterstitialAd.load(this, getString(R.string.ad_interstitial_id), adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
@@ -325,14 +350,13 @@ public class RandomModeActivity extends AppCompatActivity {
     //********************     AUX METHODS     ********************
 
     private void showTutorial() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Tutorial").
-                setMessage("Tap the yellow circle as fast as you can." +
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Tutorial")
+                .setMessage("Tap the yellow circle as fast as you can." +
                         "\n\nAfter each tap, the time the circle stays on the screen decreases." +
                         "\n\nTo share your highScore, tap it." +
                         "\n\nHave fun!")
-                .create()
+                .setPositiveButton("OK", null)
                 .show();
     }
-
 }

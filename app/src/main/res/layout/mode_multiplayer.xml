@@ -5,14 +5,27 @@
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".ClassicModeActivity">
+    android:background="@color/colorBackground"
+    tools:context=".MultiPlayerModeActivity">
+
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="@dimen/icon_md"
+        android:layout_height="@dimen/icon_md"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:background="@drawable/bg_icon_circle"
+        android:padding="@dimen/spacing_sm"
+        android:src="@drawable/ic_back"
+        android:elevation="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <ImageView
         android:id="@+id/topBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/imageView2"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,9 +37,7 @@
         android:layout_marginTop="150dp"
         android:rotation="180"
         android:text="READY"
-        android:textColor="@color/black"
-        android:textSize="50dp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.QuickTap.DisplayMedium"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -37,23 +48,18 @@
         android:layout_height="wrap_content"
         android:rotation="180"
         android:text="score"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/imageView2"
+        android:textAppearance="@style/TextAppearance.QuickTap.TitleMedium"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="@dimen/spacing_md" />
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/black"
-        android:paddingLeft="5dp"
-        android:paddingTop="2dp"
-        android:paddingRight="5dp"
-        android:paddingBottom="2dp"
-        android:scaleType="fitXY"
+    <!-- Thin divider line -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/colorSurfaceVariant"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,7 +72,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <TextView
         android:id="@+id/bottomPlayer"
@@ -74,9 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="150dp"
         android:text="READY"
-        android:textColor="@color/black"
-        android:textSize="50dp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.QuickTap.DisplayMedium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
@@ -86,21 +90,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="score"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.QuickTap.TitleMedium"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/divider"
+        android:layout_marginTop="@dimen/spacing_md" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         app:adSize="BANNER"
-        app:adUnitId="ca-app-pub-1816824579575646/5112865965"
+        app:adUnitId="@string/ad_banner_id"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -4,14 +4,13 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
@@ -24,27 +23,28 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Random;
 
-public class MultiPlayerModeActivity extends AppCompatActivity {
+public class MultiPlayerModeActivity extends BaseActivity {
 
     private static final int MIN = 1000;
     private static final int MAX = 5000;
 
     TextView topPlayer, bottomPlayer, topPlayerScore, bottomPlayerScore;
-    ImageView topBackground, bottomBackground;
+    ImageView topBackground, bottomBackground, backButton;
     ConstraintLayout background;
 
-    Handler handler;
-    MediaPlayer mp;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Random random = new Random();
+    private final Gson gson = new Gson();
+    private MediaPlayer mp;
+    private SettingsManager settingsManager;
 
     SharedPreferences sharedPref;
     private PlayerStats playerStats;
-    Gson gson;
     private InterstitialAd mInterstitialAd;
 
     private boolean isTopPlayerReady, isBottomPlayerReady = false;
     private boolean canClick = false;
 
-    private int randomInstant;
     private int topPlayerScoreValue, bottomPlayerScoreValue, plays = 0;
 
     int[] backgrounds = {R.drawable.backgroun1, R.drawable.backgroun2, R.drawable.backgroun3,
@@ -60,19 +60,14 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
 
     //********************     RUNNABLES     ********************
 
-    Runnable showNewGameRunnable = new Runnable() {
-        @Override
-        public void run() {
-            showNewGame();
-        }
-    };
+    private final Runnable showNewGameRunnable = () -> showNewGame();
 
-    Runnable canClickRunnable = new Runnable() {
-        @Override
-        public void run() {
+    private final Runnable canClickRunnable = () -> {
+        if (settingsManager.isSoundEnabled()) {
             mp.start();
-            canClick();
         }
+        HapticHelper.vibrateShot(this);
+        canClick();
     };
 
 
@@ -81,9 +76,9 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.mode_multiplayer);
 
+        settingsManager = new SettingsManager(this);
         loadAds();
 
         background = findViewById(R.id.layout);
@@ -98,6 +93,12 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         bottomBackground = findViewById(R.id.bottomBackground);
         topPlayerScore = findViewById(R.id.topPlayerScore);
         bottomPlayerScore = findViewById(R.id.bottomPlayerScore);
+        backButton = findViewById(R.id.backButton);
+
+        backButton.setOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
 
         topPlayerScore.setText(String.valueOf(topPlayerScoreValue));
         bottomPlayerScore.setText(String.valueOf(bottomPlayerScoreValue));
@@ -105,11 +106,20 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
         readyToPlay();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+        if (mp != null) {
+            mp.release();
+            mp = null;
+        }
+    }
+
     private void newGame() {
         topPlayerScore.setText(String.valueOf(topPlayerScoreValue));
         bottomPlayerScore.setText(String.valueOf(bottomPlayerScoreValue));
 
-        handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
@@ -127,6 +137,7 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
             showFullScreenAdd();
         }
 
+        backButton.setVisibility(View.VISIBLE);
         topPlayer.setVisibility(View.VISIBLE);
         bottomPlayer.setVisibility(View.VISIBLE);
         topBackground.setBackgroundColor(0x00000000);
@@ -135,39 +146,33 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     }
 
     private void readyToPlay() {
-        topPlayer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                topPlayer.setOnClickListener(null);
-                topPlayer.setVisibility(View.INVISIBLE);
-                isTopPlayerReady = true;
-                if (isBottomPlayerReady)
-                    startGame();
-            }
+        topPlayer.setOnClickListener(v -> {
+            topPlayer.setOnClickListener(null);
+            topPlayer.setVisibility(View.INVISIBLE);
+            isTopPlayerReady = true;
+            if (isBottomPlayerReady)
+                startGame();
         });
 
-        bottomPlayer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bottomPlayer.setOnClickListener(null);
-                bottomPlayer.setVisibility(View.INVISIBLE);
-                isBottomPlayerReady = true;
-                if (isTopPlayerReady)
-                    startGame();
-            }
+        bottomPlayer.setOnClickListener(v -> {
+            bottomPlayer.setOnClickListener(null);
+            bottomPlayer.setVisibility(View.INVISIBLE);
+            isBottomPlayerReady = true;
+            if (isTopPlayerReady)
+                startGame();
         });
     }
 
     private void startGame() {
+        backButton.setVisibility(View.GONE);
         isBottomPlayerReady = false;
         isTopPlayerReady = false;
 
-        randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
+        int randomInstant = random.nextInt((MAX - MIN) + 1) + MIN;
         canClick = false;
 
         playGameListeners();
 
-        handler = new Handler();
         handler.postDelayed(canClickRunnable, randomInstant);
     }
 
@@ -181,20 +186,14 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     //********************     LISTENERS     ********************
 
     private void playGameListeners() {
-        topBackground.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endGameListeners();
-                checkClick("top");
-            }
+        topBackground.setOnClickListener(v -> {
+            endGameListeners();
+            checkClick("top");
         });
 
-        bottomBackground.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endGameListeners();
-                checkClick("bottom");
-            }
+        bottomBackground.setOnClickListener(v -> {
+            endGameListeners();
+            checkClick("bottom");
         });
     }
 
@@ -236,14 +235,14 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     //********************     WINNER     ********************
 
     private void TopWins() {
-        topBackground.setBackgroundColor(getColor(R.color.greenBackgroud));
-        bottomBackground.setBackgroundColor(getColor(R.color.redBackground));
+        topBackground.setBackgroundColor(getColor(R.color.greenSuccess));
+        bottomBackground.setBackgroundColor(getColor(R.color.redError));
         topPlayerScoreValue++;
     }
 
     private void BottomWins() {
-        bottomBackground.setBackgroundColor(getColor(R.color.greenBackgroud));
-        topBackground.setBackgroundColor(getColor(R.color.redBackground));
+        bottomBackground.setBackgroundColor(getColor(R.color.greenSuccess));
+        topBackground.setBackgroundColor(getColor(R.color.redError));
         bottomPlayerScoreValue++;
     }
 
@@ -251,14 +250,15 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     //********************     ADS     ********************
 
     private void showFullScreenAdd() {
-        mInterstitialAd.show(MultiPlayerModeActivity.this);
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(MultiPlayerModeActivity.this);
+        }
     }
 
     private void loadAds() {
         AdRequest adRequest = new AdRequest.Builder().build();
 
-        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest, // TEST
-        InterstitialAd.load(this, "ca-app-pub-1816824579575646/3791851914", adRequest, // REAL
+        InterstitialAd.load(this, getString(R.string.ad_interstitial_id), adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
@@ -276,7 +276,6 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     //********************     ACHIEVEMENTS     ********************
 
     private PlayerStats getPlayerStats() {
-        gson = new Gson();
         String json = sharedPref.getString("PlayerStats", null);
         Type type = new TypeToken<PlayerStats>() {
         }.getType();
@@ -286,10 +285,8 @@ public class MultiPlayerModeActivity extends AppCompatActivity {
     private void updatePlayerStats() {
         playerStats.checkForAchievements(this);
         SharedPreferences.Editor editor = sharedPref.edit();
-        gson = new Gson();
         String json = gson.toJson(playerStats);
         editor.putString("PlayerStats", json);
         editor.apply();
     }
-
 }

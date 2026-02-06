@@ -1,52 +1,54 @@
 package com.pack.QuickTap;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.animation.OvershootInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-public class ClassicModeActivity extends AppCompatActivity {
+public class ClassicModeActivity extends BaseActivity {
 
     private static final int MIN = 1000;
     private static final int MAX = 5000;
+    private static final int DISPLAY_UPDATE_INTERVAL_MS = 16;
 
     private SharedPreferences sharedPref;
+    private SettingsManager settingsManager;
     private TextView timeCounter, highScoreText;
+    private ImageView backButton;
+    private MaterialCardView retryButton;
     private ConstraintLayout background;
 
-    ScheduledExecutorService scheduler;
-    ScheduledFuture<?> future;
-
-    Handler handler;
-    MediaPlayer mp;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Random random = new Random();
+    private final Gson gson = new Gson();
+    private MediaPlayer mp;
     private InterstitialAd mInterstitialAd;
     private PlayerStats playerStats;
-    Gson gson;
 
-    private int count;
+    private long startTimeNanos;
     private int plays = 0;
     private boolean canClick = false;
 
@@ -62,32 +64,24 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     //********************     RUNNABLES     ********************
 
-    Runnable canClickRunnable = new Runnable() {
-        @Override
-        public void run() {
+    private final Runnable canClickRunnable = () -> {
+        if (settingsManager.isSoundEnabled()) {
             mp.start();
-            canClick();
         }
+        HapticHelper.vibrateShot(this);
+        canClick();
     };
 
-    Runnable showNewGameRunnable = new Runnable() {
-        @Override
-        public void run() {
-            showNewGame();
-        }
-    };
+    private final Runnable showNewGameRunnable = () -> showNewGame();
 
-    Runnable gameRunnable = new Runnable() {
+    private final Runnable displayUpdateRunnable = new Runnable() {
         @Override
         public void run() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (canClick) {
-                        timeCounter.setText(++count + " ms");
-                    }
-                }
-            });
+            if (canClick) {
+                int elapsedMs = (int) ((System.nanoTime() - startTimeNanos) / 1_000_000L);
+                timeCounter.setText(elapsedMs + " ms");
+                handler.postDelayed(this, DISPLAY_UPDATE_INTERVAL_MS);
+            }
         }
     };
 
@@ -96,9 +90,9 @@ public class ClassicModeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.mode_classic);
 
+        settingsManager = new SettingsManager(this);
         loadAds();
 
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
@@ -108,57 +102,61 @@ public class ClassicModeActivity extends AppCompatActivity {
         timeCounter = findViewById(R.id.timeCounter);
         highScoreText = findViewById(R.id.highScore);
         background = findViewById(R.id.mainLayout);
+        backButton = findViewById(R.id.backButton);
+        retryButton = findViewById(R.id.retryButton);
 
-        highScoreText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                shareHighScore();
-            }
+        backButton.setOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
+
+        highScoreText.setOnClickListener(v -> shareHighScore());
         loadHighScore();
         startGameListeners();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+        if (mp != null) {
+            mp.release();
+            mp = null;
+        }
+    }
+
     private void startGame() {
+        backButton.setVisibility(View.GONE);
+        retryButton.setVisibility(View.GONE);
         timeCounter.setVisibility(View.INVISIBLE);
-        int randomInstant = new Random().nextInt((MAX - MIN) + 1) + MIN;
-        count = 0;
+        int randomInstant = random.nextInt((MAX - MIN) + 1) + MIN;
         canClick = false;
 
         playGameListeners();
 
-        handler = new Handler();
         handler.postDelayed(canClickRunnable, randomInstant);
     }
 
     private void canClick() {
         canClick = true;
+        startTimeNanos = System.nanoTime();
         background.setBackgroundColor(getColor(R.color.yellowBackground));
-        timeCounter.setText(count + " ms");
+        timeCounter.setText("0 ms");
         timeCounter.setVisibility(View.VISIBLE);
 
-        scheduler = Executors.newScheduledThreadPool(1);
-        future = scheduler.scheduleAtFixedRate(gameRunnable, 0, 1, TimeUnit.MILLISECONDS);
+        handler.post(displayUpdateRunnable);
     }
 
     private void showNewGame() {
-        updatePlayerStats();
-
-        plays++;
-        if (plays == 3) {
-            plays = 0;
-            showFullScreenAdd();
-        }
-
+        backButton.setVisibility(View.VISIBLE);
         timeCounter.setVisibility(View.VISIBLE);
         timeCounter.setText("START");
-        background.setBackgroundColor(getColor(R.color.white));
+        background.setBackgroundColor(getColor(R.color.colorBackground));
 
         startGameListeners();
     }
 
     private void newGame() {
-        handler = new Handler();
         handler.postDelayed(showNewGameRunnable, 2000);
     }
 
@@ -179,25 +177,47 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     private void correctClick() {
         canClick = false;
+        handler.removeCallbacks(displayUpdateRunnable);
 
-        scheduler.shutdown();
-        handler.removeCallbacks(gameRunnable);
-        future.cancel(true);
+        int elapsedMs = (int) ((System.nanoTime() - startTimeNanos) / 1_000_000L);
 
-        background.setBackgroundColor(getColor(R.color.greenBackgroud));
-        timeCounter.setText(count + " ms");
-        setHighScore(count);
+        background.setBackgroundColor(getColor(R.color.greenSuccess));
+        timeCounter.setText(elapsedMs + " ms");
+        animateTapScale(timeCounter);
+        setHighScore(elapsedMs);
         updateCorrectPlays();
-        updatePlayerScores(count);
+        updatePlayerScores(elapsedMs);
+
+        updatePlayerStats();
+        plays++;
+        if (plays == 3) {
+            plays = 0;
+            showFullScreenAdd();
+        }
 
         newGame();
     }
 
     private void incorrectClick() {
         canClick = false;
-        background.setBackgroundColor(getColor(R.color.redBackground));
+        background.setBackgroundColor(getColor(R.color.redError));
+        timeCounter.setVisibility(View.INVISIBLE);
+        backButton.setVisibility(View.VISIBLE);
+        retryButton.setVisibility(View.VISIBLE);
         updateIncorrectPlays();
-        newGame();
+
+        updatePlayerStats();
+        plays++;
+        if (plays == 3) {
+            plays = 0;
+            showFullScreenAdd();
+        }
+
+        retryButton.setOnClickListener(v -> {
+            retryButton.setOnClickListener(null);
+            retryButton.setVisibility(View.GONE);
+            showNewGame();
+        });
     }
 
 
@@ -232,31 +252,20 @@ public class ClassicModeActivity extends AppCompatActivity {
 
     private void startGameListeners() {
         loadBackGround();
-        timeCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timeCounter.setOnClickListener(null);
-                startGame();
-            }
+        timeCounter.setOnClickListener(v -> {
+            timeCounter.setOnClickListener(null);
+            startGame();
         });
         background.setOnClickListener(null);
     }
 
     private void playGameListeners() {
-        background.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endGameListeners();
-                checkClick();
-            }
-        });
-        timeCounter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endGameListeners();
-                checkClick();
-            }
-        });
+        View.OnClickListener gameClickListener = v -> {
+            endGameListeners();
+            checkClick();
+        };
+        background.setOnClickListener(gameClickListener);
+        timeCounter.setOnClickListener(gameClickListener);
     }
 
     private void endGameListeners() {
@@ -266,15 +275,28 @@ public class ClassicModeActivity extends AppCompatActivity {
     }
 
 
+    //********************     ANIMATIONS     ********************
+
+    private void animateTapScale(View view) {
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(view, "scaleX", 1f, 0.95f, 1f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(view, "scaleY", 1f, 0.95f, 1f);
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(scaleX, scaleY);
+        set.setDuration(160);
+        set.setInterpolator(new OvershootInterpolator());
+        set.start();
+    }
+
+
     //********************     AUX METHODS     ********************
 
     private void showTutorial() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Tutorial").
-                setMessage("Tap the screen as soon as you hear the sound or see the color." +
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Tutorial")
+                .setMessage("Tap the screen as soon as you hear the sound or see the color." +
                         "\n\nTo share your highScore, tap it." +
                         "\n\nHave fun!")
-                .create()
+                .setPositiveButton("OK", null)
                 .show();
     }
 
@@ -282,7 +304,6 @@ public class ClassicModeActivity extends AppCompatActivity {
     //********************     ACHIEVEMENTS     ********************
 
     private PlayerStats getPlayerStats() {
-        gson = new Gson();
         String json = sharedPref.getString("PlayerStats", null);
         Type type = new TypeToken<PlayerStats>() {
         }.getType();
@@ -309,7 +330,6 @@ public class ClassicModeActivity extends AppCompatActivity {
     private void updatePlayerStats() {
         playerStats.checkForAchievements(this);
         SharedPreferences.Editor editor = sharedPref.edit();
-        gson = new Gson();
         String json = gson.toJson(playerStats);
         editor.putString("PlayerStats", json);
         editor.apply();
@@ -319,14 +339,15 @@ public class ClassicModeActivity extends AppCompatActivity {
     //********************     ADS METHODS     ********************
 
     private void showFullScreenAdd() {
-        mInterstitialAd.show(ClassicModeActivity.this);
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(ClassicModeActivity.this);
+        }
     }
 
     private void loadAds() {
         AdRequest adRequest = new AdRequest.Builder().build();
 
-        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest, // TEST
-        InterstitialAd.load(this, "ca-app-pub-1816824579575646/3791851914", adRequest, // REAL
+        InterstitialAd.load(this, getString(R.string.ad_interstitial_id), adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

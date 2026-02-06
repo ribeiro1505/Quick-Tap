@@ -5,75 +5,122 @@
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".ClassicModeActivity">
+    android:background="@color/colorBackground"
+    tools:context=".RandomModeActivity">
+
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="@dimen/icon_md"
+        android:layout_height="@dimen/icon_md"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_lg"
+        android:background="@drawable/bg_icon_circle"
+        android:padding="@dimen/spacing_sm"
+        android:src="@drawable/ic_back"
+        android:elevation="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="START"
-        android:textColor="@color/black"
-        android:textSize="50dp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.QuickTap.DisplayMedium"
+        android:textColor="?attr/colorOnBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/retryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="@dimen/corner_md"
+        app:cardElevation="@dimen/card_elevation"
+        app:layout_constraintBottom_toTopOf="@+id/highScoreCard"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/spacing_lg"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_sm"
+            android:text="Retry"
+            android:textAppearance="@style/TextAppearance.QuickTap.TitleMedium" />
+    </com.google.android.material.card.MaterialCardView>
+
     <TextView
         android:id="@+id/currentScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#34000000"
-        android:textSize="50dp"
-        android:textStyle="bold"
         android:text="0"
+        android:textAppearance="@style/TextAppearance.QuickTap.DisplayMedium"
+        android:textColor="?attr/colorOnBackground"
+        android:alpha="0.2"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/highScore"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/highScoreCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="50dp"
-        android:text="HighScore"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        android:textStyle="bold"
+        android:layout_marginBottom="@dimen/spacing_xl"
+        app:cardCornerRadius="@dimen/corner_md"
+        app:cardElevation="@dimen/card_elevation"
         app:layout_constraintBottom_toTopOf="@+id/adView"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent">
+
+        <TextView
+            android:id="@+id/highScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/spacing_lg"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_sm"
+            android:text="HighScore"
+            android:textAppearance="@style/TextAppearance.QuickTap.TitleMedium" />
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         app:adSize="BANNER"
-        app:adUnitId="ca-app-pub-1816824579575646/5112865965"
+        app:adUnitId="@string/ad_banner_id"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <AbsoluteLayout
-        android:layout_width="fill_parent"
+    <FrameLayout
+        android:id="@+id/targetArea"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/adView"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/clickButton"
             android:layout_width="75dp"
             android:layout_height="75dp"
-            app:srcCompat="@drawable/ic_point"
-            tools:layout_editor_absoluteY="112dp" />
+            app:srcCompat="@drawable/ic_point" />
 
-    </AbsoluteLayout>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,35 +1,31 @@
 package com.pack.QuickTap;
 
-import android.app.AlertDialog;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-
-import android.util.Log;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.Calendar;
 
-public class MainPageActivity extends AppCompatActivity {
+public class MainPageActivity extends BaseActivity {
 
-    TextView classicMode, randomMode, multiPlayerMode;
-    ImageView achievements, info;
+    MaterialCardView classicCard, randomCard, multiPlayerCard;
+    View settingsButton, achievements, info, gameLogo, gameTitle;
     ConstraintLayout background;
 
     PlayerStats playerStats;
@@ -50,7 +46,6 @@ public class MainPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.main_page);
 
         background = findViewById(R.id.layout);
@@ -59,13 +54,17 @@ public class MainPageActivity extends AppCompatActivity {
         checkDate();
         loadBackGround();
 
-        classicMode = findViewById(R.id.classicMode);
-        randomMode = findViewById(R.id.randomMode);
-        multiPlayerMode = findViewById(R.id.multMode);
+        classicCard = findViewById(R.id.classicCard);
+        randomCard = findViewById(R.id.randomCard);
+        multiPlayerCard = findViewById(R.id.multiPlayerCard);
         achievements = findViewById(R.id.achievements);
         info = findViewById(R.id.info);
+        settingsButton = findViewById(R.id.settings);
+        gameLogo = findViewById(R.id.gameLogo);
+        gameTitle = findViewById(R.id.gameTitle);
 
         setClickListeners();
+        playStaggerAnimation();
     }
 
     @Override
@@ -77,66 +76,82 @@ public class MainPageActivity extends AppCompatActivity {
     }
 
     private void setClickListeners() {
-        achievements.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainPageActivity.this, AchievementsActivity.class));
+        achievements.setOnClickListener(v -> {
+            startActivity(new Intent(MainPageActivity.this, AchievementsActivity.class));
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
+
+        info.setOnClickListener(v -> {
+            startActivity(new Intent(MainPageActivity.this, InfoActivity.class));
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
+
+        settingsButton.setOnClickListener(v -> {
+            startActivity(new Intent(MainPageActivity.this, SettingsActivity.class));
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
+
+        classicCard.setOnClickListener(v -> {
+            loadSharedPrefs();
+            startActivity(new Intent(MainPageActivity.this, ClassicModeActivity.class));
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
+
+        randomCard.setOnClickListener(v -> {
+            loadSharedPrefs();
+            if (playerStats.canRandomMode()) {
+                startActivity(new Intent(MainPageActivity.this, RandomModeActivity.class));
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            } else {
+                new MaterialAlertDialogBuilder(MainPageActivity.this)
+                        .setTitle("Game Mode Locked")
+                        .setMessage("To unlock this game mode you must:\n\n" +
+                                ". Play at least 5 correct games in Classic Mode;\n" +
+                                ". Have a reaction time less than 300ms\n")
+                        .setPositiveButton("OK", null)
+                        .show();
             }
         });
 
-        info.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainPageActivity.this, InfoActivity.class));
-            }
-        });
-
-
-        classicMode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadSharedPrefs();
-                startActivity(new Intent(MainPageActivity.this, ClassicModeActivity.class));
-            }
-        });
-
-        randomMode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadSharedPrefs();
-                if (playerStats.canRandomMode())
-                    startActivity(new Intent(MainPageActivity.this, RandomModeActivity.class));
-                else
-                    new AlertDialog.Builder(MainPageActivity.this)
-                            .setTitle("Game Mode Locked")
-                            .setMessage("To unlock this game mode you must:\n\n" +
-                                    ". Play at least 5 correct games in Classic Mode;\n" +
-                                    ". Have a reaction time less than 300ms\n")
-                            .create().show();
-            }
-        });
-
-        multiPlayerMode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadSharedPrefs();
-                if (playerStats.canMultiPlayer())
-                    startActivity(new Intent(MainPageActivity.this, MultiPlayerModeActivity.class));
-                else
-                    new AlertDialog.Builder(MainPageActivity.this)
-                            .setTitle("Game Mode Locked")
-                            .setMessage("To unlock this game mode you must:\n\n" +
-                                    ". Play at least 50 correct games in Classic Mode;\n" +
-                                    ". Have a reaction time less than 200ms\n" +
-                                    ". Have at least 20 points in Random Mode")
-                            .create().show();
+        multiPlayerCard.setOnClickListener(v -> {
+            loadSharedPrefs();
+            if (playerStats.canMultiPlayer()) {
+                startActivity(new Intent(MainPageActivity.this, MultiPlayerModeActivity.class));
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            } else {
+                new MaterialAlertDialogBuilder(MainPageActivity.this)
+                        .setTitle("Game Mode Locked")
+                        .setMessage("To unlock this game mode you must:\n\n" +
+                                ". Play at least 50 correct games in Classic Mode;\n" +
+                                ". Have a reaction time less than 200ms\n" +
+                                ". Have at least 20 points in Random Mode")
+                        .setPositiveButton("OK", null)
+                        .show();
             }
         });
     }
 
+    private void playStaggerAnimation() {
+        View[] views = {gameLogo, gameTitle, classicCard, randomCard, multiPlayerCard};
+        for (int i = 0; i < views.length; i++) {
+            View v = views[i];
+            v.setAlpha(0f);
+            v.setTranslationY(30f);
+
+            ObjectAnimator alpha = ObjectAnimator.ofFloat(v, "alpha", 0f, 1f);
+            ObjectAnimator translationY = ObjectAnimator.ofFloat(v, "translationY", 30f, 0f);
+
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(alpha, translationY);
+            set.setDuration(300);
+            set.setStartDelay(i * 80L);
+            set.setInterpolator(new DecelerateInterpolator());
+            set.start();
+        }
+    }
+
     private void loadSharedPrefs() {
         sharedPref = getSharedPreferences("GameFile", MODE_PRIVATE);
-        //sharedPref.edit().putString("PlayerStats", null).apply();
         String json = sharedPref.getString("PlayerStats", null);
         if (json == null) {
             createPlayerStats();
@@ -156,9 +171,10 @@ public class MainPageActivity extends AppCompatActivity {
                 (lastDay == 365 && thisDay == 1) ||
                 (lastDay == 366 && thisDay == 1)) {
             playerStats.consecutiveDays++;
-            new AlertDialog.Builder(this)
+            new MaterialAlertDialogBuilder(this)
                     .setMessage("You've been playing for " + playerStats.consecutiveDays + " consecutive days!\n" +
                             "Keep playing daily to win Achievements!")
+                    .setPositiveButton("OK", null)
                     .show();
             playerStats.checkForAchievements(this);
         } else if (lastDay != thisDay) {
@@ -194,15 +210,10 @@ public class MainPageActivity extends AppCompatActivity {
     }
 
     private void loadAds() {
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
+        MobileAds.initialize(this, initializationStatus -> {});
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
-
 }

@@ -1,33 +1,28 @@
 package com.pack.QuickTap;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
-public class AchievementsActivity extends AppCompatActivity {
+public class AchievementsActivity extends BaseActivity {
 
     int[] images = {R.drawable.plays5, R.drawable.plays50, R.drawable.plays100, R.drawable.plays1000, R.drawable.plays5000, R.drawable.plays100000,
             R.drawable.days5, R.drawable.days10, R.drawable.days100,
@@ -65,10 +60,16 @@ public class AchievementsActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.achievements);
 
         loadAds();
+
+        ImageView backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
+
         background = findViewById(R.id.layout);
         gridview = findViewById(R.id.gridView);
         CustomAdapter customAdapter = new CustomAdapter(images, this);
@@ -98,11 +99,7 @@ public class AchievementsActivity extends AppCompatActivity {
     }
 
     private void loadAds() {
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
+        MobileAds.initialize(this, initializationStatus -> {});
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -154,36 +151,24 @@ public class AchievementsActivity extends AppCompatActivity {
             else
                 imagePhoto.setImageResource(greyImages[position]);
 
-            imagePhoto.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!playerStats.achievements[position])
-                        new AlertDialog.Builder(AchievementsActivity.this)
-                                .setTitle(getString(R.string.unlockAchievement))
-                                .setMessage('\n' + getResources().getStringArray(R.array.achievementsSentences)[position])
-                                .show();
-                    else {
-                        final AlertDialog dialog = new AlertDialog.Builder(AchievementsActivity.this)
-                                .setTitle(getString(R.string.achievementUnlocked))
-                                .setMessage(getString(R.string.setBackground))
-                                .setPositiveButton("Set Background", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        playerStats.background = position;
-                                        updatePlayerStats();
-                                        loadBackGround();
-                                    }
-                                })
-                                .setNegativeButton("Cancel", null).create();
-                        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                            @Override
-                            public void onShow(DialogInterface arg) {
-                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.black));
-                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.black));
-                            }
-                        });
-                        dialog.show();
-                    }
+            imagePhoto.setOnClickListener(v -> {
+                if (!playerStats.achievements[position]) {
+                    new MaterialAlertDialogBuilder(AchievementsActivity.this)
+                            .setTitle(getString(R.string.unlockAchievement))
+                            .setMessage('\n' + getResources().getStringArray(R.array.achievementsSentences)[position])
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else {
+                    new MaterialAlertDialogBuilder(AchievementsActivity.this)
+                            .setTitle(getString(R.string.achievementUnlocked))
+                            .setMessage(getString(R.string.setBackground))
+                            .setPositiveButton("Set Background", (dialog, which) -> {
+                                playerStats.background = position;
+                                updatePlayerStats();
+                                loadBackGround();
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
                 }
             });
 

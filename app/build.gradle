@@ -12,10 +12,22 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
+        debug {
+            resValue "string", "ad_banner_id", "ca-app-pub-3940256099942544/6300978111"
+            resValue "string", "ad_interstitial_id", "ca-app-pub-3940256099942544/1033173712"
+        }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "ad_banner_id", "ca-app-pub-1816824579575646/5112865965"
+            resValue "string", "ad_interstitial_id", "ca-app-pub-1816824579575646/3791851914"
         }
     }
     namespace 'com.pack.QuickTap'
@@ -24,6 +36,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

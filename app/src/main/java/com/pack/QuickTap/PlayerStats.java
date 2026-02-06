@@ -1,8 +1,8 @@
 package com.pack.QuickTap;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class PlayerStats {
 
@@ -21,7 +21,6 @@ public class PlayerStats {
 
     public PlayerStats() {
         this.achievements = new boolean[27];
-        //this.achievements = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true};
         this.correctPlays = 0;
         this.wrongPlays = 0;
         this.consecutiveDays = 1;
@@ -52,10 +51,11 @@ public class PlayerStats {
     }
 
     public void randomModeUnlocked(Context context) {
-        new AlertDialog.Builder(context)
+        new MaterialAlertDialogBuilder(context)
                 .setTitle("New Game Mode Unlocked!")
                 .setMessage("You've just unlocked Random Mode!")
-                .create().show();
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     public void checkForMultiPlayerMode(Context context) {
@@ -64,10 +64,11 @@ public class PlayerStats {
     }
 
     public void multiPlayerModeUnlocked(Context context) {
-        new AlertDialog.Builder(context)
+        new MaterialAlertDialogBuilder(context)
                 .setTitle("New Game Mode Unlocked!")
                 .setMessage("You've just unlocked MultiPlayer Mode!")
-                .create().show();
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     public void checkForAchievements(Context context) {
@@ -199,94 +200,11 @@ public class PlayerStats {
     }
 
     private void showAlert(int i, final Context context) {
-        String message = "";
-        final int position = i;
-        switch (i) {
-            case 0:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[0];
-                break;
-            case 1:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[1];
-                break;
-            case 2:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[2];
-                break;
-            case 3:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[3];
-                break;
-            case 4:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[4];
-                break;
-            case 5:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[5];
-                break;
-            case 6:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[6];
-                break;
-            case 7:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[7];
-                break;
-            case 8:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[8];
-                break;
-            case 9:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[9];
-                break;
-            case 10:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[10];
-                break;
-            case 11:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[11];
-                break;
-            case 12:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[12];
-                break;
-            case 13:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[13];
-                break;
-            case 14:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[14];
-                break;
-            case 15:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[15];
-                break;
-            case 16:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[16];
-                break;
-            case 17:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[17];
-                break;
-            case 18:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[18];
-                break;
-            case 19:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[19];
-                break;
-            case 20:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[20];
-                break;
-            case 21:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[21];
-                break;
-            case 22:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[22];
-                break;
-            case 23:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[23];
-                break;
-            case 24:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[24];
-                break;
-            case 25:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[25];
-                break;
-            case 26:
-                message = context.getResources().getStringArray(R.array.newAchievementMessage)[26];
-                break;
-        }
-        new AlertDialog.Builder(context)
+        String message = context.getResources().getStringArray(R.array.newAchievementMessage)[i];
+        new MaterialAlertDialogBuilder(context)
                 .setTitle(context.getString(R.string.newAchievement))
                 .setMessage(message + "\n\nYou can now set a new Background Theme in the Achievements Tab")
-                .create().show();
+                .setPositiveButton("OK", null)
+                .show();
     }
 }

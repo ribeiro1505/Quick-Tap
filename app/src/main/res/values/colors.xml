@@ -3,7 +3,23 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
+    <!-- Legacy game-state colors (kept for compatibility) -->
     <color name="greenBackgroud">#82E0AA</color>
     <color name="redBackground">#F1948A</color>
     <color name="yellowBackground">#F9E79F</color>
+
+    <!-- Material color system — Light palette -->
+    <color name="colorPrimary">#0A84FF</color>
+    <color name="colorPrimaryVariant">#0066CC</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <color name="colorBackground">#F2F2F7</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnBackground">#1C1C1E</color>
+    <color name="colorOnSurface">#1C1C1E</color>
+    <color name="colorSurfaceVariant">#E5E5EA</color>
+
+    <color name="greenSuccess">#34C759</color>
+    <color name="redError">#FF3B30</color>
+    <color name="yellowAlert">#FFCC00</color>
 </resources>

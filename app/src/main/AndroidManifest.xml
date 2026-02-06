@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -44,6 +45,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name="com.pack.QuickTap.InfoActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.pack.QuickTap.SettingsActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
     </application>
